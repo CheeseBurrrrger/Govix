@@ -16,9 +16,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Emulator → host machine: 10.0.2.2. Physical device: set your PC LAN IP in debug buildType.
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/\"")
     }
 
     buildTypes {
+        debug {
+            // Example for physical device on same Wi‑Fi (uncomment and set your IP):
+            // buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.10:3000/\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -36,11 +43,22 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

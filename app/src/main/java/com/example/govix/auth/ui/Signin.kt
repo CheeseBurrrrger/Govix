@@ -1,7 +1,5 @@
 package com.example.govix.auth.ui
 
-
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,10 +40,26 @@ private val PlaceholderGray  = Color(0xFF757575)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen() {
+fun SignInScreen(
+    isLoading: Boolean = false,
+    onRegister: (
+        firstName: String,
+        lastName: String,
+        username: String,
+        phone: String,
+        nik: String,
+        address: String,
+        birthDate: String,
+        gender: String,
+        email: String,
+        password: String,
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _ -> },
+    onNavigateToLogin: () -> Unit = {},
+) {
     var currentStep by remember { mutableStateOf(1) }
     var firstName by remember { mutableStateOf("") }
     var lastName  by remember { mutableStateOf("") }
+    var username  by remember { mutableStateOf("") }
     var phone     by remember { mutableStateOf("") }
     var nik       by remember { mutableStateOf("") }
     var address           by remember { mutableStateOf("") }
@@ -60,13 +73,13 @@ fun SignInScreen() {
     var passwordVisible   by rememberSaveable { mutableStateOf(false) }
     var rePasswordVisible by rememberSaveable { mutableStateOf(false) }
     var acceptTerms       by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val step1Valid = firstName.isNotBlank() && lastName.isNotBlank() &&
-            phone.isNotBlank() && nik.isNotBlank()
+            username.isNotBlank() &&
+            phone.isNotBlank() && nik.length == 16 && nik.all { it.isDigit() }
     val step2Valid = address.isNotBlank() && birthDate.isNotBlank() &&
             gender.isNotBlank() && email.isNotBlank() &&
             password.isNotBlank() && rePassword.isNotBlank() &&
-            password == rePassword && acceptTerms
+            password == rePassword && acceptTerms && !isLoading
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -158,6 +171,7 @@ fun SignInScreen() {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     GovixField("Nama Depan",   firstName, "Nama Depan")   { firstName = it }
                     GovixField("Nama Belakang", lastName, "Nama Belakang") { lastName  = it }
+                    GovixField("Username", username, "Nama pengguna unik") { username = it }
                     GovixField("No HP",  phone, "08xxxxxxxxxx", KeyboardType.Phone)  { phone = it }
                     GovixField("NIK",    nik,   "16 digit NIK", KeyboardType.Number) { nik   = it }
                     Spacer(Modifier.height(20.dp))
@@ -173,7 +187,7 @@ fun SignInScreen() {
                                 disabledContainerColor = GovixYellowLight
                             ),
                             shape   = RoundedCornerShape(12.dp),
-                            enabled = step1Valid
+                            enabled = step1Valid && !isLoading
                         ) {
                             Text(
                                 text       = "Selanjutnya",
@@ -191,7 +205,7 @@ fun SignInScreen() {
                                 text       = " Masuk",
                                 fontWeight = FontWeight.Bold,
                                 color      = GovixYellow,
-                                modifier   = Modifier.clickable { /* navController.navigate(login) */ }
+                                modifier   = Modifier.clickable { onNavigateToLogin() }
                             )
                         }
                     }
@@ -401,7 +415,18 @@ fun SignInScreen() {
                         Button(
                             onClick = {
                                 if (step2Valid) {
-                                    Toast.makeText(context, "Mendaftar...", Toast.LENGTH_SHORT).show()
+                                    onRegister(
+                                        firstName,
+                                        lastName,
+                                        username,
+                                        phone,
+                                        nik,
+                                        address,
+                                        birthDate,
+                                        gender,
+                                        email,
+                                        password,
+                                    )
                                 }
                             },
                             modifier = Modifier.size(width = 327.dp, height = 56.dp),
@@ -436,12 +461,22 @@ fun SignInScreen() {
                                 text       = " Masuk",
                                 fontWeight = FontWeight.Bold,
                                 color      = GovixYellow,
-                                modifier   = Modifier.clickable { /* navController.navigate(login) */ }
+                                modifier   = Modifier.clickable { onNavigateToLogin() }
                             )
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                 }
+            }
+        }
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.28f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = GovixYellow)
             }
         }
     }

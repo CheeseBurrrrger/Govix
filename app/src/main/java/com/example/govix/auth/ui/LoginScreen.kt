@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -49,7 +50,13 @@ import androidx.compose.ui.unit.sp
 import com.example.govix.R
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    isLoading: Boolean = false,
+    onLogin: (String, String) -> Unit = { _, _ -> },
+    onNavigateToRegister: () -> Unit = {},
+    onGoogleClick: () -> Unit = {},
+    onFacebookClick: () -> Unit = {},
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -239,15 +246,7 @@ fun LoginScreen() {
                         Button(
                             onClick = {
                                 if (email.isNotEmpty() && password.isNotEmpty()) {
-//                        viewModel.viewModelScope.launch {
-//                            val result = Email.signup(email, password)
-//                            viewModel.onSignUpResult(result)
-//                            Toast.makeText(
-//                                context,
-//                                "Signed Up!",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        }
+                                    onLogin(email.trim(), password)
                                 } else {
                                     Toast.makeText(
                                         context,
@@ -260,7 +259,7 @@ fun LoginScreen() {
                                 .size(width = 327.dp, height = 56.dp),
                             colors = ButtonDefaults.buttonColors(Color(0xFFFCB216)),
                             shape = RoundedCornerShape(12.dp),
-                            enabled = ValidCheck
+                            enabled = ValidCheck && !isLoading
                         )
                         {
                             Text(
@@ -286,7 +285,7 @@ fun LoginScreen() {
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFCB216),
                                 modifier = Modifier.clickable {
-//                        navController.navigate(sign_in)
+                                    onNavigateToRegister()
                                 }
                             )
                         }
@@ -323,9 +322,7 @@ fun LoginScreen() {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Button(
-                                onClick = {}
-//                    onSignInClick
-                                ,
+                                onClick = onGoogleClick,
                                 modifier = Modifier
                                     .size(width = 327.dp, height = 56.dp)
                                     .border(
@@ -359,9 +356,7 @@ fun LoginScreen() {
                         Spacer(modifier = Modifier.padding(7.dp))
 
                         Button(
-                            onClick = {}
-//                    onSignInClick
-                            ,
+                            onClick = onFacebookClick,
                             modifier = Modifier
                                 .size(width = 327.dp, height = 56.dp)
                                 .border(
@@ -394,6 +389,16 @@ fun LoginScreen() {
                     }
                 }
                 Spacer(modifier = Modifier.padding(7.dp))
+            }
+        }
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.28f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = Color(0xFFFCB216))
             }
         }
     }

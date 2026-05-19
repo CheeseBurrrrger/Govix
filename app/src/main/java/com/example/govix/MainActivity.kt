@@ -11,34 +11,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.govix.auth.ui.SignInScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.govix.auth.AuthViewModelFactory
+import com.example.govix.auth.AuthViewModel
+import com.example.govix.core.ui.theme.GovixTheme
+import com.example.govix.navigation.GovixRoot
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Thread.sleep(2000)
         installSplashScreen()
+        super.onCreate(savedInstanceState)
         setContent {
-//            GovixTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
-//            }
-            SignInScreen()
+            GovixTheme {
+                val authViewModel: AuthViewModel = viewModel(
+                    factory = AuthViewModelFactory(application),
+                )
+                GovixRoot(authViewModel = authViewModel)
+            }
         }
     }
 }
 
 @Composable
-fun prototype(){
+fun prototype() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(R.color.light_yellow_bg))
-    ){
+            .background(color = colorResource(R.color.light_yellow_bg)),
+    ) {
         Text("Gacor programmer handal berkelas tampan")
     }
 }

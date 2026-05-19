@@ -46,10 +46,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.govix.R
+import com.example.govix.navigation.Home
+import com.example.govix.navigation.Signin
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    navController: NavController
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -239,6 +244,7 @@ fun LoginScreen() {
                         Button(
                             onClick = {
                                 if (email.isNotEmpty() && password.isNotEmpty()) {
+                                    navController.navigate(Home)
 //                        viewModel.viewModelScope.launch {
 //                            val result = Email.signup(email, password)
 //                            viewModel.onSignUpResult(result)
@@ -286,7 +292,7 @@ fun LoginScreen() {
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFCB216),
                                 modifier = Modifier.clickable {
-//                        navController.navigate(sign_in)
+                        navController.navigate(Signin)
                                 }
                             )
                         }

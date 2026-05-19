@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.govix.auth.ui.SignInScreen
+import com.example.govix.dashboard.ui.HomeScreen
+import com.example.govix.navigation.GovixNav
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +29,7 @@ class MainActivity : ComponentActivity() {
 //                    )
 //                }
 //            }
-            SignInScreen()
+            GovixNav()
         }
     }
 }

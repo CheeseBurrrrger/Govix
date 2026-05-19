@@ -35,7 +35,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.govix.R
+import com.example.govix.navigation.Login
 
 private val GovixYellow      = Color(0xFFFCB216)
 private val GovixYellowLight = Color(0xFFFDD06A)
@@ -43,7 +45,9 @@ private val PlaceholderGray  = Color(0xFF757575)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen() {
+fun SignInScreen(
+    navController: NavController
+) {
     var currentStep by remember { mutableStateOf(1) }
     var firstName by remember { mutableStateOf("") }
     var lastName  by remember { mutableStateOf("") }
@@ -191,7 +195,7 @@ fun SignInScreen() {
                                 text       = " Masuk",
                                 fontWeight = FontWeight.Bold,
                                 color      = GovixYellow,
-                                modifier   = Modifier.clickable { /* navController.navigate(login) */ }
+                                modifier   = Modifier.clickable {  navController.navigate(Login)  }
                             )
                         }
                     }

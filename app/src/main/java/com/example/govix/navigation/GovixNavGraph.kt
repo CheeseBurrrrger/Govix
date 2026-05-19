@@ -17,9 +17,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.govix.auth.AuthUiEvent
 import com.example.govix.auth.AuthViewModel
-import com.example.govix.auth.ui.HomeScreen
 import com.example.govix.auth.ui.LoginScreen
 import com.example.govix.auth.ui.SignInScreen
+import com.example.govix.dashboard.ui.DashboardHomeScreen
 
 @Composable
 fun GovixRoot(
@@ -110,7 +110,8 @@ fun GovixNavGraph(
             )
         }
         composable(Screen.Home) {
-            HomeScreen(
+            DashboardHomeScreen(
+                navController = navController,
                 onLogoutClick = { authViewModel.logout() },
             )
         }

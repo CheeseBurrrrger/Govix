@@ -17,14 +17,13 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Emulator → host machine: 10.0.2.2. Physical device: set your PC LAN IP in debug buildType.
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://api.andikanugra.my.id/\"")
     }
 
     buildTypes {
         debug {
-            // Example for physical device on same Wi‑Fi (uncomment and set your IP):
-            // buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.10:3000/\"")
+            // Local backend (emulator): uncomment to override production URL
+            // buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/\"")
         }
         release {
             isMinifyEnabled = false

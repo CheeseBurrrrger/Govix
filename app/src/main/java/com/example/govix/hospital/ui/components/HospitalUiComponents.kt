@@ -19,15 +19,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-val HospitalBlue = Color(0xFF0065FF)
-val HospitalBlueDark = Color(0xFF005FF0)
-val HospitalPrimary = Color(0xFF0D6EFD)
-val HospitalCardBg = Color(0xFFE3F2FD)
+val HospitalPrimary = Color(0xFFFCB216)
+val HospitalCardBg = Color(0xFFFFF3D6)
+val HospitalBlue = HospitalPrimary
+val HospitalBlueDark = Color(0xFFF0A800)
 
 @Composable
 fun ServiceLayananCard(
@@ -54,28 +55,31 @@ fun HospitalBlueHeader(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     showBookmark: Boolean = true,
+    showBack: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-            .background(HospitalPrimary)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(horizontal = 16.dp, vertical = 20.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = Color.White,
-                )
+            if (showBack) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Kembali",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
             }
             Text(
                 text = title,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -87,13 +91,13 @@ fun HospitalBlueHeader(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f)),
+                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.BookmarkBorder,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -117,7 +121,7 @@ fun DetailTabChip(
     ) {
         Text(
             text = title,
-            color = if (selected) HospitalPrimary else Color.Black,
+            color = if (selected) MaterialTheme.colorScheme.primary else Color.Black,
             fontWeight = FontWeight.Bold,
             fontSize = 13.sp,
         )

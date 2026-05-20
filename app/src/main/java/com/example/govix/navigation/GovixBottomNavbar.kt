@@ -22,7 +22,7 @@ private val NavBackground  = Color.White
 
 sealed class BottomNavRoute(val route: String) {
     object Beranda    : BottomNavRoute("beranda")
-    object Layanan    : BottomNavRoute("layanan")
+
     object Tersimpan  : BottomNavRoute("tersimpan")
     object Akun       : BottomNavRoute("akun")
 }
@@ -35,7 +35,7 @@ data class BottomNavItem(
 
 private val navItems = listOf(
     BottomNavItem(BottomNavRoute.Beranda.route,   "Beranda",   R.drawable.home),
-    BottomNavItem(BottomNavRoute.Layanan.route,   "Layanan",   R.drawable.layanan),
+
     BottomNavItem(BottomNavRoute.Tersimpan.route, "Tersimpan", R.drawable.saved),
     BottomNavItem(BottomNavRoute.Akun.route,      "Akun",      R.drawable.personn),
 )

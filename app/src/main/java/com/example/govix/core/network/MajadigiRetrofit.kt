@@ -4,6 +4,7 @@ import com.example.govix.BuildConfig
 import com.example.govix.core.data.TokenDataStore
 import com.example.govix.data.remote.MajadigiAuthApi
 import com.example.govix.data.remote.MajadigiHospitalApi
+import com.example.govix.data.remote.MajadigiQueueApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
@@ -27,4 +28,7 @@ object MajadigiRetrofit {
 
     fun hospitalApi(tokenDataStore: TokenDataStore): MajadigiHospitalApi =
         retrofit(tokenDataStore).create(MajadigiHospitalApi::class.java)
+
+    fun queueApi(tokenDataStore: TokenDataStore): MajadigiQueueApi =
+        retrofit(tokenDataStore).create(MajadigiQueueApi::class.java)
 }

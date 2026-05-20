@@ -109,7 +109,7 @@ fun EditProfileScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF1565C0))
+                .background(Color(0xFFFCB216))
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -117,7 +117,7 @@ fun EditProfileScreen(
                 Icon(
                     painter = painterResource(R.drawable.arrowb), // use your back arrow drawable
                     contentDescription = "Kembali",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             }
             Spacer(Modifier.width(8.dp))
@@ -125,7 +125,7 @@ fun EditProfileScreen(
                 text = "Edit Profil",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color.Black
             )
         }
 

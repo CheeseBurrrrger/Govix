@@ -87,7 +87,7 @@ private fun ProfileContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF1565C0))
+                .background(Color(0xFFFCB216))
                 .padding(vertical = 32.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -111,7 +111,7 @@ private fun ProfileContent(
                         Icon(
                             painter = painterResource(R.drawable.person),
                             contentDescription = null,
-                            tint = Color(0xFF1565C0),
+                            tint = Color(0xFF212121),
                             modifier = Modifier.size(44.dp)
                         )
                     }

@@ -6,16 +6,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.govix.core.data.TokenDataStore
+import com.example.govix.core.data.ProfileDraftDataStore
 import com.example.govix.core.network.MajadigiRetrofit
+import com.example.govix.core.util.parseDdMmYyyyToIsoOrNull
 import com.example.govix.data.remote.dto.DoctorDto
 import com.example.govix.data.remote.dto.DoctorScheduleDto
 import com.example.govix.data.remote.dto.HospitalDto
 import com.example.govix.data.remote.dto.OperationalInfoDto
 import com.example.govix.data.remote.dto.PolyclinicDto
+import com.example.govix.data.remote.dto.QueueDto
+import com.example.govix.data.remote.dto.QueueRequestDto
 import com.example.govix.data.remote.dto.RoomAvailabilityItemDto
 import com.example.govix.data.remote.dto.RoomAvailabilityPayloadDto
 import com.example.govix.data.repository.HospitalDetailBundle
 import com.example.govix.data.repository.HospitalRepository
+import com.example.govix.data.repository.QueueRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,10 +64,26 @@ data class HospitalQueueUiState(
     val error: String? = null,
 )
 
+data class MyQueuesUiState(
+    val isLoading: Boolean = false,
+    val queues: List<QueueDto> = emptyList(),
+    val error: String? = null,
+)
+
+sealed class QueueBookingState {
+    data object Idle : QueueBookingState()
+    data object Loading : QueueBookingState()
+    data class Success(val queue: QueueDto) : QueueBookingState()
+    data class Error(val message: String?) : QueueBookingState()
+}
+
 class HospitalViewModel(
     application: Application,
     private val repository: HospitalRepository,
+    private val queueRepository: QueueRepository,
 ) : AndroidViewModel(application) {
+
+    private val draftStore = ProfileDraftDataStore(application)
 
     private val _listState = MutableStateFlow(HospitalListUiState())
     val listState: StateFlow<HospitalListUiState> = _listState.asStateFlow()
@@ -75,6 +96,12 @@ class HospitalViewModel(
 
     private val _queueState = MutableStateFlow(HospitalQueueUiState())
     val queueState: StateFlow<HospitalQueueUiState> = _queueState.asStateFlow()
+
+    private val _bookingState = MutableStateFlow<QueueBookingState>(QueueBookingState.Idle)
+    val bookingState: StateFlow<QueueBookingState> = _bookingState.asStateFlow()
+
+    private val _myQueuesState = MutableStateFlow(MyQueuesUiState())
+    val myQueuesState: StateFlow<MyQueuesUiState> = _myQueuesState.asStateFlow()
 
     fun loadHospitals() {
         if (_listState.value.isLoading) return
@@ -221,6 +248,75 @@ class HospitalViewModel(
             updatedAt = updatedAt,
         )
     }
+
+    fun resetBookingState() {
+        _bookingState.value = QueueBookingState.Idle
+    }
+
+    fun loadMyQueues() {
+        if (_myQueuesState.value.isLoading) return
+        viewModelScope.launch {
+            _myQueuesState.update { it.copy(isLoading = true, error = null) }
+            queueRepository.getMyQueues()
+                .onSuccess { list ->
+                    _myQueuesState.update { it.copy(isLoading = false, queues = list) }
+                }
+                .onFailure { e ->
+                    _myQueuesState.update {
+                        it.copy(isLoading = false, error = e.message ?: "Gagal memuat antrean saya.")
+                    }
+                }
+        }
+    }
+
+    fun bookQueue(
+        scheduleId: Int,
+        queueNumber: Int,
+        scheduleDate: String,
+        patientName: String,
+        patientNik: String,
+        patientBirthDate: String,
+    ) {
+        if (_bookingState.value is QueueBookingState.Loading) return
+        viewModelScope.launch {
+            _bookingState.value = QueueBookingState.Loading
+            val normalizedScheduleDate = normalizeToIsoDateOrNull(scheduleDate)
+                ?: error("Tanggal berobat harus YYYY-MM-DD atau DD/MM/YYYY.")
+            val normalizedBirthDate = normalizeToIsoDateOrNull(patientBirthDate)
+                ?: error("Tanggal lahir pasien harus YYYY-MM-DD atau DD/MM/YYYY.")
+            val body = QueueRequestDto(
+                scheduleId = scheduleId,
+                queueNumber = queueNumber,
+                scheduleDate = normalizedScheduleDate,
+                patientName = patientName.trim(),
+                patientNik = patientNik.trim(),
+                patientBirthDate = normalizedBirthDate,
+            )
+            queueRepository.bookQueue(body)
+                .onSuccess { queue ->
+                    _bookingState.value = QueueBookingState.Success(queue)
+                    // keep patient data around for next visits
+                    runCatching { draftStore.upsertFromQueuePatient(patientName, patientNik, patientBirthDate) }
+                    loadMyQueues()
+                }
+                .onFailure { e ->
+                    _bookingState.value = QueueBookingState.Error(e.message)
+                }
+        }
+    }
+}
+
+private fun normalizeToIsoDateOrNull(input: String): String? {
+    val trimmed = input.trim()
+    // Accept full ISO datetime by taking date part
+    if (trimmed.length >= 10) {
+        val datePart = trimmed.substring(0, 10)
+        if (Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(datePart)) return datePart
+    }
+    // Accept already ISO date
+    if (Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(trimmed)) return trimmed
+    // Accept DD/MM/YYYY
+    return parseDdMmYyyyToIsoOrNull(trimmed)
 }
 
 class HospitalViewModelFactory(
@@ -232,6 +328,8 @@ class HospitalViewModelFactory(
         val tokenStore = TokenDataStore(application)
         val api = MajadigiRetrofit.hospitalApi(tokenStore)
         val repository = HospitalRepository(api)
-        return HospitalViewModel(application, repository) as T
+        val queueApi = MajadigiRetrofit.queueApi(tokenStore)
+        val queueRepository = QueueRepository(queueApi)
+        return HospitalViewModel(application, repository, queueRepository) as T
     }
 }

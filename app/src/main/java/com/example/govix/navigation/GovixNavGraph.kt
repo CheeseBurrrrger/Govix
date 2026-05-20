@@ -85,6 +85,7 @@ import com.example.govix.hospital.ui.HospitalDetailScreen
 import com.example.govix.hospital.ui.HospitalListScreen
 import com.example.govix.hospital.ui.HospitalQueueScreen
 import com.example.govix.hospital.ui.HospitalRoomsScreen
+import com.example.govix.hospital.ui.SavedQueuesScreen
 import com.example.govix.profile.presentation.ProfileViewModel
 import com.example.govix.profile.presentation.ui.EditProfileScreen
 import com.example.govix.profile.presentation.ui.ProfileScreen
@@ -119,10 +120,6 @@ fun GovixRoot(
                 is AuthUiEvent.PlainToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
                 }
-
-                AuthUiEvent.NavigateHome -> TODO()
-                is AuthUiEvent.NavigateToLogin -> TODO()
-                is AuthUiEvent.PlainToast -> TODO()
             }
         }
     }
@@ -159,6 +156,7 @@ fun GovixNavGraph(
     val bottomNavRoutes = setOf(
         Screen.Home,
         Screen.HospitalList,
+        Screen.Saved,
         Screen.Profile,
 
         // add Tersimpan / Akun routes here when ready
@@ -174,7 +172,8 @@ fun GovixNavGraph(
                 GovixBottomNavBar(
                     currentRoute = when (currentRoute) {
                         Screen.Home         -> BottomNavRoute.Beranda.route
-                        Screen.HospitalList -> BottomNavRoute.Layanan.route
+
+                        Screen.Saved        -> BottomNavRoute.Tersimpan.route
                         Screen.Profile, Screen.EditProfile -> BottomNavRoute.Akun.route
                         else                -> BottomNavRoute.Beranda.route
                     },
@@ -184,10 +183,10 @@ fun GovixNavGraph(
                                 popUpTo(Screen.Home) { inclusive = false }
                                 launchSingleTop = true
                             }
-                            BottomNavRoute.Layanan.route   -> navController.navigate(Screen.HospitalList) {
+
+                            BottomNavRoute.Tersimpan.route -> navController.navigate(Screen.Saved) {
                                 launchSingleTop = true
                             }
-                            BottomNavRoute.Tersimpan.route -> { /* TODO: navigate to Tersimpan */ }
                             BottomNavRoute.Akun.route -> navController.navigate(Screen.Profile) {
                                 launchSingleTop = true
                             }
@@ -236,6 +235,9 @@ fun GovixNavGraph(
                 hospitalViewModel = hospitalViewModel,
                 onLogoutClick = { authViewModel.logout() },
             )
+        }
+        composable(Screen.Saved) {
+            SavedQueuesScreen(viewModel = hospitalViewModel)
         }
         composable(Screen.HospitalList) {
             HospitalListScreen(

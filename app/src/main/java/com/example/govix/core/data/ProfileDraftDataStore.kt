@@ -117,6 +117,26 @@ class ProfileDraftDataStore @Inject constructor(
         )
     }
 
+    suspend fun upsertFromQueuePatient(
+        patientName: String,
+        patientNik: String,
+        patientBirthDate: String,
+    ) {
+        upsertDraft(
+            ProfileDraft(
+                firstName = "",
+                lastName = "",
+                fullName = patientName,
+                phone = "",
+                nik = patientNik,
+                region = "",
+                address = "",
+                gender = "",
+                birthDate = patientBirthDate,
+            ),
+        )
+    }
+
     private suspend fun upsertDraft(incoming: ProfileDraft) {
         val existing = readDraftOrNull()
         val merged = if (existing == null) {

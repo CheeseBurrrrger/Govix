@@ -21,6 +21,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -58,26 +60,30 @@ data class ServiceItem(
 data class TabItem(val label: String)
 
 private val tabs = listOf(
-    TabItem("Layanan"),
+    TabItem("Kesehatan"),
 )
 
 private val favoriteServices = listOf(
-    ServiceItem(1, "Rumah ASN", R.drawable.rumahasn, isHospital = false),
-    ServiceItem(2, "Sapa Bansos", R.drawable.logo_aplikasi, isHospital = false),
-    ServiceItem(3, "Nomor Darurat", R.drawable.logo_aplikasi, isHospital = false, isEmergency = true),
-    ServiceItem(4, "RSUD Dr.Soetomo", R.drawable.rsud_soetomo, isHospital = true),
-    ServiceItem(5, "RSUD Saiful Anwar", R.drawable.rsud_saiful, isHospital = true),
-    ServiceItem(6, "Destinasi Wisata", R.drawable.wisata_bromo, isHospital = false),
-    ServiceItem(7, "Khas Jatim", R.drawable.logo_aplikasi, isHospital = false),
-    ServiceItem(8, "RSUD karsa Husada", R.drawable.rsud_karsa, isHospital = true),
-    ServiceItem(9, "Sidita", R.drawable.logo_aplikasi, isHospital = false),
-    ServiceItem(10, "RSUD Haji", R.drawable.rsud_haji, isHospital = true),
+    ServiceItem(1, "Nomor Darurat", R.drawable.logo_aplikasi, isEmergency = true),
+    ServiceItem(2, "Daftar RS", R.drawable.layanan, isHospital = true),
+    ServiceItem(3, "RSUD Dr.Soetomo", R.drawable.rsud_soetomo, isHospital = true),
+    ServiceItem(4, "RSUD Saiful Anwar", R.drawable.rsud_saiful, isHospital = true),
+    ServiceItem(5, "RSUD Karsa Husada", R.drawable.rsud_karsa, isHospital = true),
+    ServiceItem(6, "RSUD Haji", R.drawable.rsud_haji, isHospital = true),
+)
 
+data class StatMetric(
+    val label: String,
+    val value: String,
+    val caption: String,
+)
 
-
-
-
-    )
+private val dummyHealthStats = listOf(
+    StatMetric("Antrean Aktif", "12", "hari ini"),
+    StatMetric("Rata-rata Tunggu", "18", "menit"),
+    StatMetric("Reservasi Bulan Ini", "143", "booking"),
+    StatMetric("RS Terdekat", "5", "opsi"),
+)
 
 // ---------------------------------------------------------------------------
 // Dashboard home (named to avoid clash with auth placeholder screens)
@@ -129,36 +135,30 @@ fun DashboardHomeScreen(
                     when {
                         service.isEmergency -> navController.navigate(Screen.Emergency)
                         service.isHospital -> {
-                            val id = hospitalViewModel.findHospitalIdByName(service.name)
-                            if (id != null) {
-                                navController.navigate(Screen.hospitalDetail(id))
-                            } else {
+                            if (service.name == "Daftar RS") {
                                 navController.navigate(Screen.HospitalList)
+                            } else {
+                                val id = hospitalViewModel.findHospitalIdByName(service.name)
+                                if (id != null) navController.navigate(Screen.hospitalDetail(id))
+                                else navController.navigate(Screen.HospitalList)
                             }
                         }
                     }
                 },
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Lihat semua layanan kesehatan",
-                color = Color(0xFF1565C0),
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .clickable { navController.navigate(Screen.HospitalList) },
-            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Banner image
-            BannerSection()
+            BannerSection(
+                onFindHospital = { navController.navigate(Screen.HospitalList) },
+                onSaved = { navController.navigate(Screen.Saved) },
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // "Jawa Timur Dalam Angka" section
-            StatisticsSection()
+            StatisticsSection(metrics = dummyHealthStats)
 
             Spacer(modifier = Modifier.height(80.dp)) // bottom nav clearance
         }
@@ -177,7 +177,7 @@ private fun TopHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1565C0))
+            .background(Color(0xFFFCB216))
             .padding(horizontal = 16.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -188,7 +188,7 @@ private fun TopHeader(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFBBDEFB))
+                    .background(Color(0xFFFFE29A))
                     .then(
                         if (onLogoutClick != null) {
                             Modifier.clickable { onLogoutClick() }
@@ -201,7 +201,7 @@ private fun TopHeader(
                 Icon(
                     painter = painterResource(R.drawable.personn), // swap with a person icon
                     contentDescription = "Avatar",
-                    tint = Color(0xFF1565C0),
+                    tint = Color(0xFF212121),
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -210,13 +210,13 @@ private fun TopHeader(
                 Text(
                     text = "Selamat pagi",
                     fontSize = 12.sp,
-                    color = Color(0xFFBBDEFB)
+                    color = Color(0xFF212121)
                 )
                 Text(
                     text = userName,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color(0xFF212121)
                 )
             }
         }
@@ -225,7 +225,7 @@ private fun TopHeader(
         Icon(
             painter = painterResource(R.drawable.bell), // swap with bell icon drawable
             contentDescription = "Notifikasi",
-            tint = Color.White,
+            tint = Color(0xFF212121),
             modifier = Modifier
                 .size(28.dp)
                 .clickable { /* navigate to notifications */ }
@@ -246,12 +246,12 @@ private fun ServiceTabRow(
     ScrollableTabRow(
         selectedTabIndex = selectedIndex,
         containerColor = Color.White,
-        contentColor = Color(0xFF1565C0),
+        contentColor = Color(0xFFFCB216),
         edgePadding = 16.dp,
         indicator = { tabPositions ->
             TabRowDefaults.SecondaryIndicator(
                 modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
-                color = Color(0xFF1565C0)
+                color = Color(0xFFFCB216)
             )
         },
         divider = {}
@@ -265,7 +265,7 @@ private fun ServiceTabRow(
                         text = tab.label,
                         fontSize = 14.sp,
                         fontWeight = if (selectedIndex == index) FontWeight.Bold else FontWeight.Normal,
-                        color = if (selectedIndex == index) Color(0xFF1565C0) else Color(0xFF9E9E9E)
+                        color = if (selectedIndex == index) Color(0xFFFCB216) else Color(0xFF9E9E9E)
                     )
                 }
             )
@@ -339,7 +339,7 @@ private fun ServiceCard(
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(Color(0xFF1565C0))
+                    .background(Color(0xFFFCB216))
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             ) {
                 Text(
@@ -366,18 +366,50 @@ private fun ServiceCard(
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun BannerSection() {
-    // Replace R.drawable.logo_aplikasi with your actual banner drawable
-    Image(
-        painter = painterResource(id = R.drawable.logo_aplikasi),
-        contentDescription = "Banner",
+private fun BannerSection(
+    onFindHospital: () -> Unit,
+    onSaved: () -> Unit,
+) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(160.dp)
-            .clip(RoundedCornerShape(16.dp)),
-        contentScale = ContentScale.Crop
-    )
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color(0xFFFFF3D6))
+            .padding(16.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Reservasi rumah sakit lebih cepat",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color(0xFF212121),
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "Cari rumah sakit, pilih poli & jadwal, lalu booking antrean dari akunmu.",
+                fontSize = 12.sp,
+                color = Color(0xFF616161),
+            )
+            Spacer(Modifier.height(14.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(
+                    onClick = onFindHospital,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFCB216)),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("Cari RS", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+                Button(
+                    onClick = onSaved,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("Tersimpan", color = Color(0xFF212121), fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -385,7 +417,7 @@ private fun BannerSection() {
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun StatisticsSection() {
+private fun StatisticsSection(metrics: List<StatMetric>) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -397,12 +429,12 @@ private fun StatisticsSection() {
             Icon(
                 painter = painterResource(id = R.drawable.logo_aplikasi),
                 contentDescription = null,
-                tint = Color(0xFFE53935),
+                tint = Color(0xFFFCB216),
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Jawa Timur Dalam Angka",
+                text = "Ringkasan Kesehatan",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF212121)
@@ -416,15 +448,15 @@ private fun StatisticsSection() {
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(listOf("Penduduk", "PDRB", "IPM")) { label ->
-                StatCard(label = label)
+            items(metrics) { metric ->
+                StatCard(metric = metric)
             }
         }
     }
 }
 
 @Composable
-private fun StatCard(label: String) {
+private fun StatCard(metric: StatMetric) {
     Column(
         modifier = Modifier
             .width(120.dp)
@@ -435,16 +467,29 @@ private fun StatCard(label: String) {
     ) {
         Icon(
             painter = painterResource(id = R.drawable.logo_aplikasi), // swap per category
-            contentDescription = label,
-            tint = Color(0xFF1565C0),
+            contentDescription = metric.label,
+            tint = Color(0xFFFCB216),
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = label,
+            text = metric.value,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF212121),
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = metric.label,
             fontSize = 12.sp,
             color = Color(0xFF616161),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = metric.caption,
+            fontSize = 11.sp,
+            color = Color(0xFF9E9E9E),
+            textAlign = TextAlign.Center,
         )
     }
 }

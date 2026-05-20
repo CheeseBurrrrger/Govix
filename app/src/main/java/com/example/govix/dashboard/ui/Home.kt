@@ -199,7 +199,7 @@ private fun TopHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.person), // swap with a person icon
+                    painter = painterResource(R.drawable.personn), // swap with a person icon
                     contentDescription = "Avatar",
                     tint = Color(0xFF1565C0),
                     modifier = Modifier.size(24.dp)

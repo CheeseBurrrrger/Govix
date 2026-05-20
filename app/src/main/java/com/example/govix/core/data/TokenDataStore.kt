@@ -6,12 +6,16 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 private val Context.authDataStore: DataStore<Preferences> by preferencesDataStore(name = "govix_auth")
 
-class TokenDataStore(context: Context) {
+class TokenDataStore@Inject constructor(
+    @ApplicationContext context: Context
+) {
 
     private val dataStore = context.applicationContext.authDataStore
     private val tokenKey = stringPreferencesKey("jwt_token")

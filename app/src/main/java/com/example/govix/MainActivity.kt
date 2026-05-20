@@ -16,7 +16,9 @@ import com.example.govix.auth.AuthViewModelFactory
 import com.example.govix.auth.AuthViewModel
 import com.example.govix.core.ui.theme.GovixTheme
 import com.example.govix.navigation.GovixRoot
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()

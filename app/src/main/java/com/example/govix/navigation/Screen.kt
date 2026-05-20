@@ -11,6 +11,9 @@ object Screen {
     const val HospitalQueue = "hospital_queue/{hospitalId}"
     const val Emergency = "emergency"
 
+    const val Profile    = "profile"
+    const val EditProfile = "edit_profile"
+
     fun hospitalDetail(hospitalId: Int) = "hospital_detail/$hospitalId"
     fun hospitalRooms(hospitalId: Int) = "hospital_rooms/$hospitalId"
     fun hospitalQueue(hospitalId: Int) = "hospital_queue/$hospitalId"

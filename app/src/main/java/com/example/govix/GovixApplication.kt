@@ -1,4 +1,7 @@
 package com.example.govix
 
-class GovixApplication {
-}
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class GovixApp : Application()

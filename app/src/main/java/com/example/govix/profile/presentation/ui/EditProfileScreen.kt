@@ -22,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -149,7 +150,6 @@ fun EditProfileScreen(
             ProfileTextField(label = "Tanggal Lahir (YYYY-MM-DD)", value = birthDate, onValueChange = { birthDate = it })
         }
 
-        // ── Save button ───────────────────────────────────────────────────────
         Button(
             onClick = {
                 viewModel.updateProfile(
@@ -199,6 +199,10 @@ private fun ProfileTextField(
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black
+            )
         )
     }
 }

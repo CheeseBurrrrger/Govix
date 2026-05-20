@@ -175,6 +175,7 @@ fun GovixNavGraph(
                     currentRoute = when (currentRoute) {
                         Screen.Home         -> BottomNavRoute.Beranda.route
                         Screen.HospitalList -> BottomNavRoute.Layanan.route
+                        Screen.Profile, Screen.EditProfile -> BottomNavRoute.Akun.route
                         else                -> BottomNavRoute.Beranda.route
                     },
                     onItemClick = { route ->

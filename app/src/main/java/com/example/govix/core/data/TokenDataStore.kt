@@ -16,9 +16,16 @@ class TokenDataStore(context: Context) {
     private val dataStore = context.applicationContext.authDataStore
     private val tokenKey = stringPreferencesKey("jwt_token")
 
-    @Volatile
-    var memoryToken: String? = null
-        private set
+    companion object {
+        @Volatile
+        private var sharedMemoryToken: String? = null
+    }
+
+    private var memoryToken: String?
+        get() = sharedMemoryToken
+        set(value) {
+            sharedMemoryToken = value
+        }
 
     suspend fun hydrate() {
         val token = dataStore.data.map { prefs -> prefs[tokenKey] }.first()

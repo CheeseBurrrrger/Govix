@@ -11,15 +11,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.govix.auth.AuthUiEvent
 import com.example.govix.auth.AuthViewModel
 import com.example.govix.auth.ui.LoginScreen
 import com.example.govix.auth.ui.SignInScreen
 import com.example.govix.dashboard.ui.DashboardHomeScreen
+import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.hospital.HospitalViewModelFactory
+import com.example.govix.hospital.ui.EmergencyScreen
+import com.example.govix.hospital.ui.HospitalDetailScreen
+import com.example.govix.hospital.ui.HospitalListScreen
+import com.example.govix.hospital.ui.HospitalQueueScreen
+import com.example.govix.hospital.ui.HospitalRoomsScreen
 
 @Composable
 fun GovixRoot(
@@ -79,6 +89,10 @@ fun GovixNavGraph(
     startDestination: String,
 ) {
     val isLoading by authViewModel.isLoading.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val hospitalViewModel: HospitalViewModel = viewModel(
+        factory = HospitalViewModelFactory(context.applicationContext as android.app.Application),
+    )
 
     NavHost(
         navController = navController,
@@ -110,10 +124,72 @@ fun GovixNavGraph(
             )
         }
         composable(Screen.Home) {
+            LaunchedEffect(Unit) {
+                hospitalViewModel.loadHospitals()
+            }
             DashboardHomeScreen(
                 navController = navController,
+                hospitalViewModel = hospitalViewModel,
                 onLogoutClick = { authViewModel.logout() },
             )
+        }
+        composable(Screen.HospitalList) {
+            HospitalListScreen(
+                viewModel = hospitalViewModel,
+                onHospitalClick = { id, _ ->
+                    navController.navigate(Screen.hospitalDetail(id))
+                },
+                onEmergencyClick = { navController.navigate(Screen.Emergency) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Screen.HospitalDetail,
+            arguments = listOf(navArgument("hospitalId") { type = NavType.IntType }),
+        ) { entry ->
+            val hospitalId = entry.arguments?.getInt("hospitalId") ?: return@composable
+            HospitalDetailScreen(
+                hospitalId = hospitalId,
+                viewModel = hospitalViewModel,
+                onBack = { navController.popBackStack() },
+                onQueueClick = { id, name ->
+                    navController.navigate(Screen.hospitalQueue(id))
+                },
+                onRoomsClick = { id ->
+                    navController.navigate(Screen.hospitalRooms(id))
+                },
+            )
+        }
+        composable(
+            route = Screen.HospitalRooms,
+            arguments = listOf(navArgument("hospitalId") { type = NavType.IntType }),
+        ) { entry ->
+            val hospitalId = entry.arguments?.getInt("hospitalId") ?: return@composable
+            HospitalRoomsScreen(
+                hospitalId = hospitalId,
+                viewModel = hospitalViewModel,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(
+            route = Screen.HospitalQueue,
+            arguments = listOf(navArgument("hospitalId") { type = NavType.IntType }),
+        ) { entry ->
+            val hospitalId = entry.arguments?.getInt("hospitalId") ?: return@composable
+            val hospitalName = hospitalViewModel.detailState.value.hospital?.name
+                ?: hospitalViewModel.listState.value.hospitals
+                    .firstOrNull { it.id == hospitalId }
+                    ?.name
+                ?: "Rumah Sakit"
+            HospitalQueueScreen(
+                hospitalId = hospitalId,
+                hospitalName = hospitalName.orEmpty(),
+                viewModel = hospitalViewModel,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Emergency) {
+            EmergencyScreen(onBack = { navController.popBackStack() })
         }
     }
 }

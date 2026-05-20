@@ -44,11 +44,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.govix.R
+import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.navigation.Screen
 
 data class ServiceItem(
     val rank: Int,
     val name: String,
-    val iconRes: Int
+    val iconRes: Int,
+    val isHospital: Boolean = false,
+    val isEmergency: Boolean = false,
 )
 
 data class TabItem(val label: String)
@@ -58,16 +62,16 @@ private val tabs = listOf(
 )
 
 private val favoriteServices = listOf(
-    ServiceItem(1, "Rumah ASN",          R.drawable.rumahasn),
-    ServiceItem(2, "Sapa Bansos", R.drawable.logo_aplikasi),
-    ServiceItem(3, "Nomor Darurat",        R.drawable.logo_aplikasi),
-    ServiceItem(4, "RSUD Dr.Soetomo",   R.drawable.logo_aplikasi),
-    ServiceItem(5, "RSUD Saiful Anwar",   R.drawable.logo_aplikasi),
-    ServiceItem(6, "Destinasi Wisata",   R.drawable.logo_aplikasi),
-    ServiceItem(7, "Khas Jatim",   R.drawable.logo_aplikasi),
-    ServiceItem(8, "RSUD karsa Husada",   R.drawable.logo_aplikasi),
-    ServiceItem(9, "Sidita",   R.drawable.logo_aplikasi),
-    ServiceItem(10, "RSUD Haji",   R.drawable.logo_aplikasi),
+    ServiceItem(1, "Rumah ASN", R.drawable.rumahasn, isHospital = false),
+    ServiceItem(2, "Sapa Bansos", R.drawable.logo_aplikasi, isHospital = false),
+    ServiceItem(3, "Nomor Darurat", R.drawable.logo_aplikasi, isHospital = false, isEmergency = true),
+    ServiceItem(4, "RSUD Dr.Soetomo", R.drawable.rsud_soetomo, isHospital = true),
+    ServiceItem(5, "RSUD Saiful Anwar", R.drawable.rsud_saiful, isHospital = true),
+    ServiceItem(6, "Destinasi Wisata", R.drawable.wisata_bromo, isHospital = false),
+    ServiceItem(7, "Khas Jatim", R.drawable.logo_aplikasi, isHospital = false),
+    ServiceItem(8, "RSUD karsa Husada", R.drawable.rsud_karsa, isHospital = true),
+    ServiceItem(9, "Sidita", R.drawable.logo_aplikasi, isHospital = false),
+    ServiceItem(10, "RSUD Haji", R.drawable.rsud_haji, isHospital = true),
 
 
 
@@ -82,6 +86,7 @@ private val favoriteServices = listOf(
 @Composable
 fun DashboardHomeScreen(
     navController: NavController,
+    hospitalViewModel: HospitalViewModel,
     userName: String = "Pengunjung",
     onLogoutClick: (() -> Unit)? = null,
 ) {
@@ -118,7 +123,32 @@ fun DashboardHomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Service grid (LazyRow with wrapping via chunked rows)
-            ServiceGrid(services = favoriteServices)
+            ServiceGrid(
+                services = favoriteServices,
+                onServiceClick = { service ->
+                    when {
+                        service.isEmergency -> navController.navigate(Screen.Emergency)
+                        service.isHospital -> {
+                            val id = hospitalViewModel.findHospitalIdByName(service.name)
+                            if (id != null) {
+                                navController.navigate(Screen.hospitalDetail(id))
+                            } else {
+                                navController.navigate(Screen.HospitalList)
+                            }
+                        }
+                    }
+                },
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Lihat semua layanan kesehatan",
+                color = Color(0xFF1565C0),
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clickable { navController.navigate(Screen.HospitalList) },
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -248,37 +278,48 @@ private fun ServiceTabRow(
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun ServiceGrid(services: List<ServiceItem>) {
+private fun ServiceGrid(
+    services: List<ServiceItem>,
+    onServiceClick: (ServiceItem) -> Unit,
+) {
     // Split into two rows: first row max 4 items, second row remainder
     val firstRow = services.take(4)
     val secondRow = services.drop(4)
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        ServiceRow(items = firstRow)
+        ServiceRow(items = firstRow, onServiceClick = onServiceClick)
         if (secondRow.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            ServiceRow(items = secondRow)
+            ServiceRow(items = secondRow, onServiceClick = onServiceClick)
         }
     }
 }
 
 @Composable
-private fun ServiceRow(items: List<ServiceItem>) {
+private fun ServiceRow(
+    items: List<ServiceItem>,
+    onServiceClick: (ServiceItem) -> Unit,
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items) { service ->
-            ServiceCard(service = service)
+            ServiceCard(service = service, onClick = { onServiceClick(service) })
         }
     }
 }
 
 @Composable
-private fun ServiceCard(service: ServiceItem) {
+private fun ServiceCard(
+    service: ServiceItem,
+    onClick: () -> Unit,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(72.dp)
+        modifier = Modifier
+            .width(72.dp)
+            .clickable(onClick = onClick),
     ) {
         Box(contentAlignment = Alignment.TopEnd) {
             Box(

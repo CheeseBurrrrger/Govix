@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.govix.core.data.ProfileDraftDataStore
 import com.example.govix.core.data.TokenDataStore
 import com.example.govix.core.network.MajadigiRetrofit
 import com.example.govix.core.util.genderLabelToApi
@@ -30,6 +31,8 @@ class AuthViewModel(
     private val repository: AuthRepository,
     private val tokenDataStore: TokenDataStore,
 ) : AndroidViewModel(application) {
+
+    private val profileDraftDataStore = ProfileDraftDataStore(application)
 
     private val _hydrated = MutableStateFlow(false)
     val hydrated: StateFlow<Boolean> = _hydrated.asStateFlow()
@@ -67,6 +70,7 @@ class AuthViewModel(
         username: String,
         phone: String,
         nik: String,
+        region: String,
         address: String,
         birthDateDdMmYyyy: String,
         genderLabel: String,
@@ -88,14 +92,23 @@ class AuthViewModel(
                 _events.emit(AuthUiEvent.PlainToast("NIK harus 16 digit angka."))
                 return@launch
             }
-            val name = "${firstName.trim()} ${lastName.trim()}".trim()
+            if (region.isBlank()) {
+                _events.emit(AuthUiEvent.PlainToast("Wilayah wajib diisi."))
+                return@launch
+            }
+            val first = firstName.trim()
+            val last = lastName.trim()
+            val fullName = "$first $last".trim()
             val body = RegisterRequest(
-                name = name,
-                username = user,
                 email = email.trim(),
-                phone = phone.trim(),
+                username = user,
                 password = password,
+                firstName = first,
+                lastName = last,
+                fullName = fullName,
+                phone = phone.trim(),
                 nik = nik.trim(),
+                region = region.trim(),
                 address = address.trim(),
                 birthDate = iso,
                 gender = genderLabelToApi(genderLabel),
@@ -103,13 +116,12 @@ class AuthViewModel(
             _isLoading.value = true
             repository.register(body)
                 .onSuccess { loggedInWithToken ->
+                    profileDraftDataStore.saveFromRegister(body)
                     if (loggedInWithToken) {
-                        _events.emit(AuthUiEvent.NavigateHome)
-                    } else {
-                        _events.emit(
-                            AuthUiEvent.NavigateToLogin("Berhasil mendaftar. Silakan masuk."),
-                        )
+                        // Backend may return a token on register; app flow expects user to login explicitly.
+                        tokenDataStore.clearToken()
                     }
+                    _events.emit(AuthUiEvent.NavigateToLogin("Berhasil mendaftar. Silakan masuk."))
                 }
                 .onFailure { e ->
                     _events.emit(AuthUiEvent.PlainToast(e.message ?: "Pendaftaran gagal."))

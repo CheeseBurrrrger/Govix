@@ -216,8 +216,8 @@ fun GovixNavGraph(
         composable(Screen.Register) {
             SignInScreen(
                 isLoading = isLoading,
-                onRegister = { first, last, user, phone, nik, addr, birth, gender, email, pass ->
-                    authViewModel.register(first, last, user, phone, nik, addr, birth, gender, email, pass)
+                onRegister = { first, last, user, phone, nik, region, addr, birth, gender, email, pass ->
+                    authViewModel.register(first, last, user, phone, nik, region, addr, birth, gender, email, pass)
                 },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login) {

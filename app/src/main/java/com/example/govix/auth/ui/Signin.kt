@@ -48,12 +48,13 @@ fun SignInScreen(
         username: String,
         phone: String,
         nik: String,
+        region: String,
         address: String,
         birthDate: String,
         gender: String,
         email: String,
         password: String,
-    ) -> Unit = { _, _, _, _, _, _, _, _, _, _ -> },
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _ -> },
     onNavigateToLogin: () -> Unit = {},
 ) {
     var currentStep by remember { mutableStateOf(1) }
@@ -62,6 +63,7 @@ fun SignInScreen(
     var username  by remember { mutableStateOf("") }
     var phone     by remember { mutableStateOf("") }
     var nik       by remember { mutableStateOf("") }
+    var region            by remember { mutableStateOf("") }
     var address           by remember { mutableStateOf("") }
     var birthDate         by remember { mutableStateOf("") }
     var gender            by remember { mutableStateOf("") }
@@ -76,7 +78,7 @@ fun SignInScreen(
     val step1Valid = firstName.isNotBlank() && lastName.isNotBlank() &&
             username.isNotBlank() &&
             phone.isNotBlank() && nik.length == 16 && nik.all { it.isDigit() }
-    val step2Valid = address.isNotBlank() && birthDate.isNotBlank() &&
+    val step2Valid = address.isNotBlank() && region.isNotBlank() && birthDate.isNotBlank() &&
             gender.isNotBlank() && email.isNotBlank() &&
             password.isNotBlank() && rePassword.isNotBlank() &&
             password == rePassword && acceptTerms && !isLoading
@@ -219,6 +221,7 @@ fun SignInScreen(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     GovixField("Alamat", address, "Alamat lengkap") { address = it }
+                    GovixField("Wilayah", region, "Kota/Kabupaten") { region = it }
                     GovixField("Tanggal Lahir", birthDate, "DD/MM/YYYY", KeyboardType.Number) {
                         birthDate = it
                     }
@@ -421,6 +424,7 @@ fun SignInScreen(
                                         username,
                                         phone,
                                         nik,
+                                        region,
                                         address,
                                         birthDate,
                                         gender,

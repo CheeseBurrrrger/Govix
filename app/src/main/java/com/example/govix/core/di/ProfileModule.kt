@@ -3,6 +3,7 @@ package com.example.govix.core.di
 import com.example.govix.profile.data.remote.ProfileApiService
 import com.example.govix.profile.data.repository.ProfileRepositoryImpl
 import com.example.govix.profile.domain.repository.ProfileRepository
+import com.example.govix.core.data.ProfileDraftDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,6 +22,8 @@ object ProfileModule {
 
     @Provides
     @Singleton
-    fun provideProfileRepository(api: ProfileApiService): ProfileRepository =
-        ProfileRepositoryImpl(api)
+    fun provideProfileRepository(
+        api: ProfileApiService,
+        draftStore: ProfileDraftDataStore,
+    ): ProfileRepository = ProfileRepositoryImpl(api, draftStore)
 }

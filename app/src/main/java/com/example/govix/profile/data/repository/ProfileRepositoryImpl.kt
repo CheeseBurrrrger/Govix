@@ -16,8 +16,11 @@ class ProfileRepositoryImpl @Inject constructor(
 ) : ProfileRepository {
 
     override suspend fun getProfile(): Result<Profile> = runCatching {
-        val dto = api.getProfile().data
-        Log.d("ProfileDebug", "firstName=${dto.firstName}, lastName=${dto.lastName}, fullName=${dto.fullName}")
+        val response = api.getProfile()
+        Log.d("ProfileDebug", "FULL RESPONSE: $response")
+        Log.d("ProfileDebug", "DATA FIELD: ${response.data}")
+        val dto = response.data
+        Log.d("ProfileDebug", "RAW DTO: $dto")
         val fromApi = dto.toDomain()
         val draft = draftStore.readDraftOrNull()
         val merged = if (draft == null) fromApi else fromApi.mergeMissingFromDraft(draft)

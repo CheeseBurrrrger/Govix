@@ -7,13 +7,11 @@ data class ApiListResponse<T>(
     val message: String? = null,
     val data: List<T>? = null,
 )
-
 data class ApiObjectResponse<T>(
     val success: Boolean? = null,
     val message: String? = null,
     val data: T? = null,
 )
-
 data class HospitalDto(
     val id: Int? = null,
     val name: String? = null,
@@ -25,21 +23,18 @@ data class HospitalDto(
     val phone: String? = null,
     @SerializedName("image_url") val imageUrl: String? = null,
 )
-
 data class PolyclinicDto(
     val id: Int? = null,
     val name: String? = null,
     val description: String? = null,
     @SerializedName("floor_location") val floorLocation: String? = null,
 )
-
 data class DoctorDto(
     val id: Int? = null,
     val name: String? = null,
     val title: String? = null,
     val specialization: String? = null,
 )
-
 data class DoctorScheduleDto(
     val id: Int? = null,
     @SerializedName("day_of_week") val dayOfWeek: String? = null,
@@ -48,12 +43,10 @@ data class DoctorScheduleDto(
     @SerializedName("max_patients") val maxPatients: Int? = null,
     @SerializedName("current_patients") val currentPatients: Int? = null,
 )
-
 data class RoomAvailabilitySummaryDto(
     val total: Int? = null,
     val available: Int? = null,
 )
-
 data class RoomAvailabilityItemDto(
     @SerializedName("room_name") val roomName: String? = null,
     @SerializedName("room_class") val roomClass: String? = null,
@@ -62,12 +55,10 @@ data class RoomAvailabilityItemDto(
     @SerializedName("occupied_beds") val occupiedBeds: Int? = null,
     @SerializedName("updated_at") val updatedAt: String? = null,
 )
-
 data class RoomAvailabilityPayloadDto(
     val summary: RoomAvailabilitySummaryDto? = null,
     val details: List<RoomAvailabilityItemDto>? = null,
 )
-
 data class OperationalInfoDto(
     val category: String? = null,
     val content: String? = null,

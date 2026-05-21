@@ -9,7 +9,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 
-interface MajadigiQueueApi {
+interface GovixQueueApi {
     @POST("api/queues")
     suspend fun bookQueue(@Body body: QueueRequestDto): Response<ApiObjectResponse<QueueDto>>
 

@@ -1,7 +1,7 @@
 package com.example.govix.data.repository
 
 import com.example.govix.core.data.TokenDataStore
-import com.example.govix.data.remote.MajadigiAuthApi
+import com.example.govix.data.remote.GovixAuthApi
 import com.example.govix.data.remote.dto.AuthWrappedResponse
 import com.example.govix.data.remote.dto.ChangePasswordRequest
 import com.example.govix.data.remote.dto.LoginRequest
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Response
 
 class AuthRepository(
-    private val api: MajadigiAuthApi,
+    private val api: GovixAuthApi,
     private val tokenDataStore: TokenDataStore,
     private val gson: Gson = Gson(),
 ) {
@@ -27,7 +27,6 @@ class AuthRepository(
         }
     }
 
-    /** @return `true` if server returned a token and session was saved; `false` if account created without token. */
     suspend fun register(body: RegisterRequest): Result<Boolean> = withContext(Dispatchers.IO) {
         runCatching {
             val response = api.register(body)

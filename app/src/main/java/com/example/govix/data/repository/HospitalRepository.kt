@@ -1,6 +1,6 @@
 package com.example.govix.data.repository
 
-import com.example.govix.data.remote.MajadigiHospitalApi
+import com.example.govix.data.remote.GovixHospitalApi
 import com.example.govix.data.remote.dto.ApiListResponse
 import com.example.govix.data.remote.dto.ApiObjectResponse
 import com.example.govix.data.remote.dto.DoctorDto
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Response
 
 class HospitalRepository(
-    private val api: MajadigiHospitalApi,
+    private val api: GovixHospitalApi,
     private val gson: Gson = Gson(),
 ) {
 

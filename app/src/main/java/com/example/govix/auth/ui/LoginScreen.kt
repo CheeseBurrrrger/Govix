@@ -1,41 +1,24 @@
 package com.example.govix.auth.ui
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,10 +27,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.govix.R
+
+// ── Brand tokens ────────────────────────────────────────────────
+private val GovixYellow      = Color(0xFFFCB216)
+private val GovixYellowLight = Color(0xFFFDD06A)
+private val PlaceholderGray  = Color(0xFF9E9E9E)
+private val LabelGray        = Color(0xFF424242)
+private val DividerGray      = Color(0xFFE0E0E0)
+private val ErrorRed         = Color(0xFFE53935)
 
 @Composable
 fun LoginScreen(
@@ -57,6 +47,13 @@ fun LoginScreen(
     onGoogleClick: () -> Unit = {},
     onFacebookClick: () -> Unit = {},
 ) {
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    val isFormValid = email.isNotBlank() && password.isNotBlank()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -65,341 +62,356 @@ fun LoginScreen(
                 contentScale = ContentScale.Crop
             )
     ) {
-        var passwordVisibility by rememberSaveable { mutableStateOf(false) }
-        var RePasswordVisibility by rememberSaveable { mutableStateOf(false) }
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        val context = LocalContext.current
-
-        val icon = if (passwordVisibility)
-            painterResource(id = R.drawable.eye)
-        else
-            painterResource(id = R.drawable.hide)
-        val icon2 = if (RePasswordVisibility)
-            painterResource(id = R.drawable.eye)
-        else
-            painterResource(id = R.drawable.hide)
-
-        val ValidCheck =
-            email.isNotBlank()
-                    && password.isNotBlank()
-
+        // ── Frosted bottom sheet ─────────────────────────────────
         Column(
-
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.75f)
+                .fillMaxHeight(0.80f)
                 .background(
                     color = Color.White,
-                    shape = RoundedCornerShape(topStart = 48.dp, topEnd = 48.dp)
+                    shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)
                 )
                 .verticalScroll(rememberScrollState())
-                .align(Alignment.BottomCenter), Arrangement.Bottom
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.Top
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight()
+            Spacer(Modifier.height(28.dp))
 
+            // ── Logo + App name ──────────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo_aplikasi),
-                        contentDescription = "Logo aplikasi",
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Govix",
-//                        fontFamily = SFProdisplayFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 42.sp,
-                        color = Color.Black
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.logo_aplikasi),
+                    contentDescription = "Logo Govix",
+                    modifier = Modifier.size(36.dp)
+                )
+                Spacer(Modifier.width(10.dp))
                 Text(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    text = "Email",
-                    fontSize = 16.sp,
-//            fontFamily = SFProdisplayFontFamily
+                    text = "Govix",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 38.sp,
+                    color = Color.Black
                 )
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email
-                    ),
-                    placeholder = {
-                        Text(
-                            text = "E-Mail",
-                            color = Color(0xFF757575),
-//                    fontFamily = SFProdisplayFontFamily
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.quill_mail),
-                            contentDescription = "Email Icon",
-                            modifier = Modifier.size(width = 22.dp, height = 22.dp),
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
-                        .size(width = 327.dp, height = 56.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(24.dp)
-                        ),
-                    singleLine = true,
-
-                    shape = RoundedCornerShape(24.dp)
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
-
-                Text(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    text = "Kata Sandi",
-                    fontSize = 16.sp,
-//            fontFamily = SFProdisplayFontFamily
-                )
-                //Password container
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = {
-                        Text(
-                            text = "Kata Sandi",
-                            color = Color(0xFF757575),
-//                    fontFamily = SFProdisplayFontFamily
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            passwordVisibility = !passwordVisibility
-                        }) {
-                            Icon(
-                                painter = icon,
-                                contentDescription = "Visibility Icon",
-                                modifier = Modifier.size(width = 24.dp, height = 24.dp)
-                            )
-                        }
-                    },
-
-                    visualTransformation = if (passwordVisibility) VisualTransformation.None
-                    else PasswordVisualTransformation(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.simple_line_icons_lock),
-                            contentDescription = "Lock Icon",
-                            modifier = Modifier.size(width = 22.dp, height = 22.dp),
-                        )
-                    },
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
-                        .size(width = 327.dp, height = 56.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(24.dp)
-                        ),
-
-                    shape = RoundedCornerShape(24.dp)
-                )
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-
-                        Text(
-                            text = "Lupa Kata Sandi ?",
-                            fontSize = 14.sp,
-//                            fontFamily = SFProdisplayFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFDA990E),
-                            modifier = Modifier
-                                .padding(vertical = 5.dp, horizontal = 12.dp)
-                                .clickable {
-//                                    navController.navigate(resetpassword)
-
-                                },
-                            textAlign = TextAlign.End
-
-                        )
-                    }
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Spacer(modifier = Modifier.padding(10.dp))
-                        Button(
-                            onClick = {
-                                if (email.isNotEmpty() && password.isNotEmpty()) {
-                                    onLogin(email.trim(), password)
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Please fill all fields",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            },
-                            modifier = Modifier
-                                .size(width = 327.dp, height = 56.dp),
-                            colors = ButtonDefaults.buttonColors(Color(0xFFFCB216)),
-                            shape = RoundedCornerShape(12.dp),
-                            enabled = ValidCheck && !isLoading
-                        )
-                        {
-                            Text(
-                                text = "Masuk",
-//                    fontFamily = SFProdisplayFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
-                            )
-                        }
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "Belum mempunyai akun?",
-//                    fontFamily = SFProdisplayFontFamily,
-                                fontWeight = FontWeight.Normal
-                            )
-                            Text(
-                                text = " Daftar",
-//                    fontFamily = SFProdisplayFontFamily,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFCB216),
-                                modifier = Modifier.clickable {
-                                    onNavigateToRegister()
-                                }
-                            )
-                        }
-                        Spacer(modifier = Modifier.padding(12.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.line),
-                                contentDescription = "line",
-                                modifier = Modifier.padding(8.dp),
-
-                                )
-
-                            Text(
-                                text = "Atau",
-//                fontFamily = SFProdisplayFontFamily,
-                                fontSize = 14.sp
-                            )
-
-                            Image(
-                                painter = painterResource(id = R.drawable.line),
-                                contentDescription = "line",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.padding(10.dp))
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Button(
-                                onClick = onGoogleClick,
-                                modifier = Modifier
-                                    .size(width = 327.dp, height = 56.dp)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color(0xFFFCB216),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ),
-                                colors = ButtonDefaults.buttonColors(Color.Transparent),
-//                            shape = RoundedCornerShape(24.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.googleicon),
-                                        contentDescription = "Logo Google",
-                                        modifier = Modifier.size(40.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Masuk dengan Google",
-//                        fontFamily = SFProdisplayFontFamily,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp,
-                                        color = Color.Black
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.padding(7.dp))
-
-                        Button(
-                            onClick = onFacebookClick,
-                            modifier = Modifier
-                                .size(width = 327.dp, height = 56.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = Color(0xFFFCB216),
-                                    shape = RoundedCornerShape(12.dp)
-                                ),
-                            colors = ButtonDefaults.buttonColors(Color.Transparent),
-//                            shape = RoundedCornerShape(24.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.fbicon),
-                                    contentDescription = "Logo Google",
-                                    modifier = Modifier.size(40.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Masuk dengan Facebook",
-//                        fontFamily = SFProdisplayFontFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = Color.Black
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.padding(7.dp))
             }
+
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Selamat datang kembali 👋",
+                fontSize = 15.sp,
+                color = PlaceholderGray,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
+            Spacer(Modifier.height(28.dp))
+
+            // ── Email field ──────────────────────────────────────
+            GovixInputField(
+                label = "Email",
+                value = email,
+                placeholder = "nama@email.com",
+                leadingIcon = R.drawable.quill_mail,
+                keyboardType = KeyboardType.Email,
+                onValueChange = { email = it }
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            // ── Password field ───────────────────────────────────
+            GovixInputField(
+                label = "Kata Sandi",
+                value = password,
+                placeholder = "Masukkan kata sandi",
+                leadingIcon = R.drawable.simple_line_icons_lock,
+                keyboardType = KeyboardType.Password,
+                isPassword = true,
+                passwordVisible = passwordVisible,
+                onPasswordToggle = { passwordVisible = !passwordVisible },
+                onValueChange = { password = it }
+            )
+
+            // ── Forgot password ──────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    text = "Lupa Kata Sandi?",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = GovixYellow,
+                    modifier = Modifier.clickable { /* navigate */ }
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // ── Login button ─────────────────────────────────────
+            GovixPrimaryButton(
+                text = "Masuk",
+                isLoading = isLoading,
+                enabled = isFormValid && !isLoading,
+                onClick = {
+                    if (isFormValid) {
+                        onLogin(email.trim(), password)
+                    } else {
+                        Toast.makeText(context, "Isi semua kolom terlebih dahulu", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // ── Register prompt ──────────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Belum punya akun?", fontSize = 14.sp, color = LabelGray)
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "Daftar",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = GovixYellow,
+                    modifier = Modifier.clickable { onNavigateToRegister() }
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // ── "Or" divider ─────────────────────────────────────
+            GovixDivider()
+
+            Spacer(Modifier.height(20.dp))
+
+            // ── Social login buttons ─────────────────────────────
+            GovixSocialButton(
+                iconRes = R.drawable.googleicon,
+                text = "Masuk dengan Google",
+                onClick = onGoogleClick
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            GovixSocialButton(
+                iconRes = R.drawable.fbicon,
+                text = "Masuk dengan Facebook",
+                onClick = onFacebookClick
+            )
+
+            Spacer(Modifier.height(28.dp))
         }
-        if (isLoading) {
+
+        // ── Full-screen loading overlay ──────────────────────────
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.28f)),
-                contentAlignment = Alignment.Center,
+                    .background(Color.Black.copy(alpha = 0.35f)),
+                contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = Color(0xFFFCB216))
+                CircularProgressIndicator(
+                    color = GovixYellow,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier.size(48.dp)
+                )
             }
         }
+    }
+}
+
+// ── Shared composables (used across Login + SignIn) ──────────────
+
+@Composable
+fun GovixInputField(
+    label: String,
+    value: String,
+    placeholder: String,
+    leadingIcon: Int? = null,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isPassword: Boolean = false,
+    passwordVisible: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    onPasswordToggle: (() -> Unit)? = null,
+    onValueChange: (String) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = LabelGray,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(placeholder, color = PlaceholderGray, fontSize = 14.sp) },
+            singleLine = true,
+            isError = isError,
+            leadingIcon = leadingIcon?.let {
+                {
+                    Icon(
+                        painter = painterResource(it),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = if (value.isNotBlank()) GovixYellow else PlaceholderGray
+                    )
+                }
+            },
+            trailingIcon = if (isPassword && onPasswordToggle != null) {
+                {
+                    IconButton(onClick = onPasswordToggle) {
+                        Icon(
+                            painter = painterResource(
+                                if (passwordVisible) R.drawable.eye else R.drawable.hide
+                            ),
+                            contentDescription = "Toggle password visibility",
+                            modifier = Modifier.size(22.dp),
+                            tint = PlaceholderGray
+                        )
+                    }
+                }
+            } else null,
+            visualTransformation = if (isPassword && !passwordVisible)
+                PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = GovixYellow,
+                unfocusedBorderColor = DividerGray,
+                errorBorderColor = ErrorRed,
+                focusedContainerColor = Color(0xFFFFFDF5),
+                unfocusedContainerColor = Color(0xFFFAFAFA),
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        )
+        if (isError && errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = ErrorRed,
+                fontSize = 11.sp,
+                modifier = Modifier.padding(start = 4.dp, top = 3.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun GovixPrimaryButton(
+    text: String,
+    isLoading: Boolean = false,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = GovixYellow,
+            disabledContainerColor = GovixYellowLight,
+            contentColor = Color.White,
+            disabledContentColor = Color.White.copy(alpha = 0.7f)
+        ),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 0.dp
+        )
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = Color.White,
+                strokeWidth = 2.dp,
+                modifier = Modifier.size(22.dp)
+            )
+        } else {
+            Text(
+                text = text,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun GovixSocialButton(
+    iconRes: Int,
+    text: String,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        shape = RoundedCornerShape(14.dp),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, DividerGray),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color.White,
+            contentColor = Color(0xFF212121)
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = text,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun GovixDivider() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = DividerGray,
+            thickness = 1.dp
+        )
+        Text(
+            text = "  Atau  ",
+            fontSize = 13.sp,
+            color = PlaceholderGray
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = DividerGray,
+            thickness = 1.dp
+        )
     }
 }

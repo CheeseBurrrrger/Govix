@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.govix.core.data.TokenDataStore
 import com.example.govix.core.data.ProfileDraftDataStore
-import com.example.govix.core.network.MajadigiRetrofit
+import com.example.govix.core.network.GovixRetrofit
 import com.example.govix.core.util.parseDdMmYyyyToIsoOrNull
 import com.example.govix.data.remote.dto.DoctorDto
 import com.example.govix.data.remote.dto.DoctorScheduleDto
@@ -326,9 +326,9 @@ class HospitalViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val tokenStore = TokenDataStore(application)
-        val api = MajadigiRetrofit.hospitalApi(tokenStore)
+        val api = GovixRetrofit.hospitalApi(tokenStore)
         val repository = HospitalRepository(api)
-        val queueApi = MajadigiRetrofit.queueApi(tokenStore)
+        val queueApi = GovixRetrofit.queueApi(tokenStore)
         val queueRepository = QueueRepository(queueApi)
         return HospitalViewModel(application, repository, queueRepository) as T
     }

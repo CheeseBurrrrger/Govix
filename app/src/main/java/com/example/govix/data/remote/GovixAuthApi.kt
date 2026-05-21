@@ -10,7 +10,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
 
-interface MajadigiAuthApi {
+interface GovixAuthApi {
 
     @POST("api/auth/login")
     suspend fun login(@Body body: LoginRequest): Response<AuthWrappedResponse>

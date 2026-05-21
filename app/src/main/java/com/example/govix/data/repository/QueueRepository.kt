@@ -1,6 +1,6 @@
 package com.example.govix.data.repository
 
-import com.example.govix.data.remote.MajadigiQueueApi
+import com.example.govix.data.remote.GovixQueueApi
 import com.example.govix.data.remote.dto.QueueDto
 import com.example.govix.data.remote.dto.QueueRequestDto
 import kotlinx.coroutines.Dispatchers
@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Response
 
 class QueueRepository(
-    private val api: MajadigiQueueApi,
+    private val api: GovixQueueApi,
 ) {
 
     suspend fun bookQueue(body: QueueRequestDto): Result<QueueDto> = withContext(Dispatchers.IO) {

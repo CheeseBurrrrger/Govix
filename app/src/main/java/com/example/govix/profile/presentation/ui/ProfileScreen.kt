@@ -1,32 +1,23 @@
 package com.example.govix.profile.presentation.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,30 +31,41 @@ import com.example.govix.profile.domain.model.Profile
 import com.example.govix.profile.presentation.ProfileState
 import com.example.govix.profile.presentation.ProfileViewModel
 
+// ── Brand tokens ─────────────────────────────────────────────────
+private val Yellow      = Color(0xFFFCB216)
+private val YellowDeep  = Color(0xFFE09A00)
+private val YellowLight = Color(0xFFFFD76E)
+private val YellowPale  = Color(0xFFFFF8E7)
+private val Surface     = Color(0xFFF7F7F7)
+private val CardBg      = Color.White
+private val TextPrimary = Color(0xFF1A1A1A)
+private val TextHint    = Color(0xFF9E9E9E)
+private val Divider     = Color(0xFFF0F0F0)
+
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onEditClick: () -> Unit,
 ) {
     val state by viewModel.profileState.collectAsStateWithLifecycle()
-
     LaunchedEffect(Unit) { viewModel.loadProfile() }
 
     when (val s = state) {
         is ProfileState.Loading, ProfileState.Idle -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFFFCB216))
+                CircularProgressIndicator(color = Yellow)
             }
         }
         is ProfileState.Error -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = s.message ?: "Terjadi kesalahan", color = Color(0xFFE53935))
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                    Icon(Icons.Outlined.ErrorOutline, null, tint = Color(0xFFE53935), modifier = Modifier.size(48.dp))
                     Spacer(Modifier.height(12.dp))
-                    Button(
-                        onClick = { viewModel.loadProfile() },
-                        colors = ButtonDefaults.buttonColors(Color(0xFFFCB216))
-                    ) { Text("Coba Lagi") }
+                    Text(s.message ?: "Terjadi kesalahan", color = Color(0xFFE53935), fontSize = 14.sp)
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = { viewModel.loadProfile() }, colors = ButtonDefaults.buttonColors(Yellow)) {
+                        Text("Coba Lagi", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -80,110 +82,184 @@ private fun ProfileContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+            .background(Surface)
             .verticalScroll(rememberScrollState())
     ) {
-        // ── Header ──────────────────────────────────────────────────────────
+        // ── Hero header ───────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFFCB216))
-                .padding(vertical = 32.dp),
+                .background(
+                    Brush.verticalGradient(listOf(YellowDeep, Yellow, YellowLight))
+                )
+                .padding(bottom = 48.dp)
+                .padding(top = 24.dp, bottom = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 // Avatar
                 Box(
                     modifier = Modifier
-                        .size(88.dp)
+                        .size(96.dp)
+                        .shadow(6.dp, CircleShape)
                         .clip(CircleShape)
-                        .background(Color(0xFFBBDEFB)),
+                        .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
                     if (profile.avatarUrl != null) {
                         AsyncImage(
-                            model = profile.avatarUrl,
+                            model              = profile.avatarUrl,
                             contentDescription = "Avatar",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            modifier           = Modifier.fillMaxSize(),
+                            contentScale       = ContentScale.Crop
                         )
                     } else {
                         Icon(
-                            painter = painterResource(R.drawable.person),
+                            painter            = painterResource(R.drawable.person),
                             contentDescription = null,
-                            tint = Color(0xFF212121),
-                            modifier = Modifier.size(44.dp)
+                            tint               = Yellow,
+                            modifier           = Modifier.size(52.dp)
                         )
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(16.dp))
+
+                // Name — fallback chain: fullName → firstName+lastName → username
+                val displayName = when {
+                    !profile.fullName.isNullOrBlank()  -> profile.fullName
+                    !profile.firstName.isNullOrBlank() ->
+                        listOfNotNull(profile.firstName, profile.lastName).joinToString(" ")
+                    else -> profile.username
+                }
                 Text(
-                    text = profile.fullName.ifBlank { profile.username },
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    text       = displayName,
+                    fontSize   = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color      = Color(0xFF1A0A00)
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    text = profile.email,
+                    text     = "@${profile.username}",
                     fontSize = 13.sp,
-                    color = Color(0xFFBBDEFB)
+                    color    = Color(0xFF5A3A00)
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text     = profile.email,
+                    fontSize = 13.sp,
+                    color    = Color(0xFF5A3A00)
                 )
             }
         }
 
-        // ── Info card ────────────────────────────────────────────────────────
+        // ── Cards overlap the header ──────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .offset(y = (-28).dp)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Informasi Pribadi",
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = Color(0xFF212121)
-            )
-            Spacer(Modifier.height(8.dp))
-            ProfileRow(label = "Username",    value = profile.username)
-            ProfileRow(label = "NIK",         value = profile.nik.ifBlank { "-" })
-            ProfileRow(label = "No. HP",      value = profile.phone.ifBlank { "-" })
-            ProfileRow(label = "Jenis Kelamin", value = profile.gender.ifBlank { "-" })
-            ProfileRow(label = "Tanggal Lahir", value = profile.birthDate.ifBlank { "-" })
-            ProfileRow(label = "Wilayah",     value = profile.region.ifBlank { "-" })
-            ProfileRow(label = "Alamat",      value = profile.address.ifBlank { "-" })
-        }
+            // ── Identity card ─────────────────────────────────────
+            ProfileCard(title = "Identitas") {
+                ProfileRow(Icons.Outlined.Person,       "Nama Depan",  profile.firstName.orDash())
+                ProfileRow(Icons.Outlined.Person,       "Nama Belakang", profile.lastName.orDash())
+                ProfileRow(Icons.Outlined.Badge,        "Username",    "@${profile.username}")
+                ProfileRow(Icons.Outlined.CreditCard,   "NIK",         profile.nik.orDash())
+                ProfileRow(Icons.Outlined.Wc,           "Jenis Kelamin",
+                    when (profile.gender.trim().uppercase()) {
+                        "L", "LAKI", "LAKI - LAKI" -> "Laki-laki"
+                        "P", "PEREMPUAN"            -> "Perempuan"
+                        else                        -> profile.gender.orDash()
+                    }
+                )
+                ProfileRow(Icons.Outlined.Cake,         "Tanggal Lahir", profile.birthDate.orDash(), isLast = true)
+            }
 
-        // ── Edit button ──────────────────────────────────────────────────────
-        Button(
-            onClick = onEditClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(52.dp),
-            colors = ButtonDefaults.buttonColors(Color(0xFFFCB216)),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(
-                text = "Edit Profil",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color.White
-            )
+            // ── Contact card ──────────────────────────────────────
+            ProfileCard(title = "Kontak & Lokasi") {
+                ProfileRow(Icons.Outlined.Email,        "Email",    profile.email)
+                ProfileRow(Icons.Outlined.Phone,        "No. HP",   profile.phone.orDash())
+                ProfileRow(Icons.Outlined.LocationCity, "Wilayah",  profile.region.orDash())
+                ProfileRow(Icons.Outlined.Home,         "Alamat",   profile.address.orDash(), isLast = true)
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // ── Edit button ───────────────────────────────────────
+            Button(
+                onClick        = onEditClick,
+                modifier       = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                colors         = ButtonDefaults.buttonColors(Yellow),
+                shape          = RoundedCornerShape(14.dp),
+                elevation      = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+            ) {
+                Icon(Icons.Outlined.Edit, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Edit Profil", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+            }
+
+            Spacer(Modifier.height(80.dp))
         }
-        Spacer(Modifier.height(80.dp))
     }
 }
 
+// ── Reusable card wrapper ─────────────────────────────────────────
 
 @Composable
-private fun ProfileRow(label: String, value: String) {
-    Column(modifier = Modifier.padding(vertical = 6.dp)) {
-        Text(text = label, fontSize = 12.sp, color = Color(0xFF9E9E9E))
-        Text(text = value, fontSize = 15.sp, color = Color(0xFF212121))
-        HorizontalDivider(modifier = Modifier.padding(top = 8.dp), color = Color(0xFFF5F5F5))
+private fun ProfileCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(CardBg)
+            .padding(20.dp)
+    ) {
+        Text(title, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
+        Spacer(Modifier.height(16.dp))
+        content()
     }
 }
+
+// ── Single profile row ────────────────────────────────────────────
+
+@Composable
+private fun ProfileRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    isLast: Boolean = false,
+) {
+    Row(
+        modifier          = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(YellowPale),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = Yellow, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, fontSize = 11.sp, color = TextHint, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(2.dp))
+            Text(value, fontSize = 14.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+        }
+    }
+    if (!isLast) {
+        HorizontalDivider(color = Divider, thickness = 1.dp)
+    }
+}
+
+// ── Extension ────────────────────────────────────────────────────
+
+private fun String?.orDash() = if (isNullOrBlank()) "—" else this

@@ -13,8 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface MajadigiHospitalApi {
-
+interface GovixHospitalApi {
     @GET("api/hospitals")
     suspend fun getHospitals(@Query("city") city: String? = null): Response<ApiListResponse<HospitalDto>>
 

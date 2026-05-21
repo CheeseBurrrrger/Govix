@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.govix.core.data.ProfileDraftDataStore
 import com.example.govix.core.data.TokenDataStore
-import com.example.govix.core.network.MajadigiRetrofit
+import com.example.govix.core.network.GovixRetrofit
 import com.example.govix.core.util.genderLabelToApi
 import com.example.govix.core.util.parseDdMmYyyyToIsoOrNull
 import com.example.govix.data.remote.dto.RegisterRequest
@@ -167,7 +167,7 @@ class AuthViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val tokenStore = TokenDataStore(application)
-        val api = MajadigiRetrofit.authApi(tokenStore)
+        val api = GovixRetrofit.authApi(tokenStore)
         val repository = AuthRepository(api, tokenStore)
         return AuthViewModel(application, repository, tokenStore) as T
     }

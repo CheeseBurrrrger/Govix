@@ -5,6 +5,11 @@ import com.example.govix.profile.data.dto.UpdateProfileRequestDto
 import com.example.govix.profile.domain.model.Profile
 import com.example.govix.profile.domain.model.UpdateProfileRequest
 
+private fun String.toGenderApiValue(): String = when (trim().uppercase()) {
+    "LAKI - LAKI", "LAKI-LAKI", "L" -> "L"
+    "PEREMPUAN", "P"                 -> "P"
+    else                             -> this  // pass through if already correct
+}
 fun ProfileDto.toDomain(): Profile {
     val apiFullName = fullName.orEmpty()
     val apiFirst = firstName.orEmpty()
@@ -47,6 +52,6 @@ fun UpdateProfileRequest.toDto() = UpdateProfileRequestDto(
     nik = nik,
     region = region,
     address = address,
-    gender = gender,
+    gender = gender.toGenderApiValue(),
     birthDate = birthDate,
 )

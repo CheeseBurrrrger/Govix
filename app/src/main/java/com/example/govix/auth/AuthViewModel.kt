@@ -25,7 +25,6 @@ sealed interface AuthUiEvent {
     data class NavigateToLogin(val message: String?) : AuthUiEvent
     data class PlainToast(val message: String) : AuthUiEvent
 }
-
 class AuthViewModel(
     application: Application,
     private val repository: AuthRepository,

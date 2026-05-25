@@ -99,7 +99,7 @@ class AuthRepository(
                 val parsed = gson.fromJson(err, SimpleErrorBody::class.java)
                 val m = parsed.message ?: parsed.error
                 if (!m.isNullOrBlank()) return m
-            } catch (_: Exception) { /* ignore */ }
+            } catch (_: Exception) {  }
             return err
         }
         return "HTTP ${response.code()}"

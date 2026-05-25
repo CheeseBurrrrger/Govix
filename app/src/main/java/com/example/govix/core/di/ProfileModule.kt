@@ -19,7 +19,6 @@ object ProfileModule {
     @Singleton
     fun provideProfileApiService(retrofit: Retrofit): ProfileApiService =
         retrofit.create(ProfileApiService::class.java)
-
     @Provides
     @Singleton
     fun provideProfileRepository(

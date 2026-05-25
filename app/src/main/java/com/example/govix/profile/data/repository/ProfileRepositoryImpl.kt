@@ -14,7 +14,6 @@ class ProfileRepositoryImpl @Inject constructor(
     private val api: ProfileApiService,
     private val draftStore: ProfileDraftDataStore,
 ) : ProfileRepository {
-
     override suspend fun getProfile(): Result<Profile> = runCatching {
         val response = api.getProfile()
         Log.d("ProfileDebug", "FULL RESPONSE: $response")
@@ -27,7 +26,6 @@ class ProfileRepositoryImpl @Inject constructor(
         draftStore.saveFromProfile(merged)
         merged
     }
-
     override suspend fun updateProfile(request: UpdateProfileRequest): Result<Profile> = runCatching {
         val profile = api.updateProfile(request.toDto()).data.toDomain()
         draftStore.saveFromProfile(profile)

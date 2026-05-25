@@ -40,7 +40,7 @@ class ProfileViewModel @Inject constructor(
             updateProfileUseCase(request)
                 .onSuccess {
                     _updateState.value = UpdateProfileState.Success
-                    _profileState.value = ProfileState.Success(it) // refresh profile data
+                    _profileState.value = ProfileState.Success(it)
                 }
                 .onFailure { _updateState.value = UpdateProfileState.Error(it.message) }
         }

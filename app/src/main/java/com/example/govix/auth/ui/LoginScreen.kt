@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.govix.R
 
-// ── Brand tokens ────────────────────────────────────────────────
 private val GovixYellow      = Color(0xFFFCB216)
 private val GovixYellowLight = Color(0xFFFDD06A)
 private val PlaceholderGray  = Color(0xFF9E9E9E)
@@ -62,7 +61,6 @@ fun LoginScreen(
                 contentScale = ContentScale.Crop
             )
     ) {
-        // ── Frosted bottom sheet ─────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -78,7 +76,6 @@ fun LoginScreen(
         ) {
             Spacer(Modifier.height(28.dp))
 
-            // ── Logo + App name ──────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -109,7 +106,6 @@ fun LoginScreen(
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Email field ──────────────────────────────────────
             GovixInputField(
                 label = "Email",
                 value = email,
@@ -121,7 +117,6 @@ fun LoginScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // ── Password field ───────────────────────────────────
             GovixInputField(
                 label = "Kata Sandi",
                 value = password,
@@ -134,7 +129,6 @@ fun LoginScreen(
                 onValueChange = { password = it }
             )
 
-            // ── Forgot password ──────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -146,13 +140,12 @@ fun LoginScreen(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = GovixYellow,
-                    modifier = Modifier.clickable { /* navigate */ }
+                    modifier = Modifier.clickable {  }
                 )
             }
 
             Spacer(Modifier.height(20.dp))
 
-            // ── Login button ─────────────────────────────────────
             GovixPrimaryButton(
                 text = "Masuk",
                 isLoading = isLoading,
@@ -168,7 +161,6 @@ fun LoginScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // ── Register prompt ──────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -187,12 +179,10 @@ fun LoginScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // ── "Or" divider ─────────────────────────────────────
             GovixDivider()
 
             Spacer(Modifier.height(20.dp))
 
-            // ── Social login buttons ─────────────────────────────
             GovixSocialButton(
                 iconRes = R.drawable.googleicon,
                 text = "Masuk dengan Google",
@@ -210,7 +200,6 @@ fun LoginScreen(
             Spacer(Modifier.height(28.dp))
         }
 
-        // ── Full-screen loading overlay ──────────────────────────
         AnimatedVisibility(
             visible = isLoading,
             enter = fadeIn(),
@@ -232,7 +221,6 @@ fun LoginScreen(
     }
 }
 
-// ── Shared composables (used across Login + SignIn) ──────────────
 
 @Composable
 fun GovixInputField(

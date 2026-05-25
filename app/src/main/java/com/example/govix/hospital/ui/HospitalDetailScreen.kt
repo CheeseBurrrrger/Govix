@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +45,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.ui.components.DetailTabChip
 import com.example.govix.hospital.ui.components.HospitalBlue
 import com.example.govix.hospital.ui.components.HospitalBlueDark

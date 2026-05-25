@@ -39,7 +39,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// ── Brand tokens (same as LoginScreen.kt) ───────────────────────
 private val GovixYellow      = Color(0xFFFCB216)
 private val GovixYellowLight = Color(0xFFFDD06A)
 private val PlaceholderGray  = Color(0xFF9E9E9E)
@@ -66,17 +65,12 @@ fun SignInScreen(
     ) -> Unit = { _, _, _, _, _, _, _, _, _, _, _ -> },
     onNavigateToLogin: () -> Unit = {},
 ) {
-    // ── State ────────────────────────────────────────────────────
     var currentStep by remember { mutableStateOf(1) }
-
-    // Step 1 fields
     var firstName by remember { mutableStateOf("") }
     var lastName  by remember { mutableStateOf("") }
     var username  by remember { mutableStateOf("") }
     var phone     by remember { mutableStateOf("") }
     var nik       by remember { mutableStateOf("") }
-
-    // Step 2 fields
     var address           by remember { mutableStateOf("") }
     var region            by remember { mutableStateOf("") }
     var birthDate         by remember { mutableStateOf("") }
@@ -90,7 +84,6 @@ fun SignInScreen(
     var rePasswordVisible by rememberSaveable { mutableStateOf(false) }
     var acceptTerms       by remember { mutableStateOf(false) }
 
-    // ── Validation ───────────────────────────────────────────────
     val nikValid   = nik.length == 16 && nik.all { it.isDigit() }
     val step1Valid = firstName.isNotBlank() && lastName.isNotBlank() &&
             username.isNotBlank() && phone.isNotBlank() && nikValid
@@ -124,8 +117,6 @@ fun SignInScreen(
             verticalArrangement = Arrangement.Top
         ) {
             Spacer(Modifier.height(28.dp))
-
-            // ── Logo ─────────────────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -146,8 +137,6 @@ fun SignInScreen(
             }
 
             Spacer(Modifier.height(24.dp))
-
-            // ── Step header ──────────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -166,7 +155,6 @@ fun SignInScreen(
                         color = PlaceholderGray
                     )
                 }
-                // Step bubbles
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     repeat(2) { index ->
                         val isActive  = index + 1 == currentStep
@@ -196,8 +184,6 @@ fun SignInScreen(
             }
 
             Spacer(Modifier.height(8.dp))
-
-            // ── Progress bar ─────────────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -214,10 +200,7 @@ fun SignInScreen(
                     )
                 }
             }
-
             Spacer(Modifier.height(24.dp))
-
-            // ── Step content ─────────────────────────────────────
             AnimatedContent(
                 targetState = currentStep,
                 transitionSpec = {
@@ -232,7 +215,6 @@ fun SignInScreen(
                 label = "step_animation"
             ) { step ->
                 if (step == 1) {
-                    // ── STEP 1 ───────────────────────────────────
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -255,18 +237,14 @@ fun SignInScreen(
                                 )
                             }
                         }
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "Username",
                             value = username,
                             placeholder = "Nama pengguna unik",
                             onValueChange = { username = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "No. HP",
                             value = phone,
@@ -274,9 +252,7 @@ fun SignInScreen(
                             keyboardType = KeyboardType.Phone,
                             onValueChange = { phone = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "NIK",
                             value = nik,
@@ -286,17 +262,13 @@ fun SignInScreen(
                             errorMessage = "NIK harus 16 digit angka",
                             onValueChange = { if (it.length <= 16) nik = it }
                         )
-
                         Spacer(Modifier.height(28.dp))
-
                         GovixPrimaryButton(
                             text = "Selanjutnya →",
                             enabled = step1Valid && !isLoading,
                             onClick = { if (step1Valid) currentStep = 2 }
                         )
-
                         Spacer(Modifier.height(16.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
@@ -312,40 +284,30 @@ fun SignInScreen(
                                 modifier = Modifier.clickable { onNavigateToLogin() }
                             )
                         }
-
                         Spacer(Modifier.height(28.dp))
                     }
                 } else {
-                    // ── STEP 2 ───────────────────────────────────
                     Column(modifier = Modifier.fillMaxWidth()) {
-
                         GovixInputField(
                             label = "Alamat",
                             value = address,
                             placeholder = "Alamat lengkap",
                             onValueChange = { address = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "Wilayah",
                             value = region,
                             placeholder = "Kota / Kabupaten",
                             onValueChange = { region = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixDatePickerField(
                             label = "Tanggal Lahir",
                             value = birthDate,
                             onDateSelected = { birthDate = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
-                        // ── Gender dropdown ───────────────────────
                         Text(
                             text = "Jenis Kelamin",
                             fontSize = 13.sp,
@@ -391,9 +353,7 @@ fun SignInScreen(
                                 }
                             }
                         }
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "Email",
                             value = email,
@@ -402,9 +362,7 @@ fun SignInScreen(
                             keyboardType = KeyboardType.Email,
                             onValueChange = { email = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "Kata Sandi",
                             value = password,
@@ -416,9 +374,7 @@ fun SignInScreen(
                             onPasswordToggle = { passwordVisible = !passwordVisible },
                             onValueChange = { password = it }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
                         GovixInputField(
                             label = "Konfirmasi Kata Sandi",
                             value = rePassword,
@@ -432,10 +388,7 @@ fun SignInScreen(
                             onPasswordToggle = { rePasswordVisible = !rePasswordVisible },
                             onValueChange = { rePassword = it }
                         )
-
                         Spacer(Modifier.height(14.dp))
-
-                        // ── Terms checkbox ────────────────────────
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -468,9 +421,7 @@ fun SignInScreen(
                                 }
                             )
                         }
-
                         Spacer(Modifier.height(20.dp))
-
                         GovixPrimaryButton(
                             text = "Daftar",
                             isLoading = isLoading,
@@ -484,10 +435,7 @@ fun SignInScreen(
                                 }
                             }
                         )
-
                         Spacer(Modifier.height(12.dp))
-
-                        // ── Back to step 1 ────────────────────────
                         TextButton(
                             onClick = { currentStep = 1 },
                             modifier = Modifier.fillMaxWidth()
@@ -499,9 +447,7 @@ fun SignInScreen(
                                 fontSize = 14.sp
                             )
                         }
-
                         Spacer(Modifier.height(8.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
@@ -517,14 +463,11 @@ fun SignInScreen(
                                 modifier = Modifier.clickable { onNavigateToLogin() }
                             )
                         }
-
                         Spacer(Modifier.height(28.dp))
                     }
                 }
             }
         }
-
-        // ── Full-screen loading overlay ──────────────────────────
         AnimatedVisibility(
             visible = isLoading,
             enter = fadeIn(),
@@ -545,7 +488,6 @@ fun SignInScreen(
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GovixDatePickerField(
@@ -556,7 +498,6 @@ fun GovixDatePickerField(
     var showDialog by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     val formatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
-
     Text(
         text = label,
         fontSize = 13.sp,
@@ -564,7 +505,6 @@ fun GovixDatePickerField(
         color = Color(0xFF424242),
         modifier = Modifier.padding(bottom = 6.dp)
     )
-
     OutlinedTextField(
         value = value.ifEmpty { "" },
         onValueChange = {},
@@ -596,7 +536,6 @@ fun GovixDatePickerField(
             .height(56.dp)
             .clickable { showDialog = true }
     )
-
     if (showDialog) {
         DatePickerDialog(
             onDismissRequest = { showDialog = false },

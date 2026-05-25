@@ -1,54 +1,4 @@
-//package com.example.govix.navigation
-//
-//import android.widget.Toast
-//import androidx.compose.foundation.layout.Box
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.material3.CircularProgressIndicator
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.LaunchedEffect
-//import androidx.compose.runtime.getValue
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.platform.LocalContext
-//import androidx.lifecycle.compose.collectAsStateWithLifecycle
-//import androidx.lifecycle.viewmodel.compose.viewModel
-//import androidx.navigation.NavHostController
-//import androidx.navigation.NavType
-//import androidx.navigation.compose.NavHost
-//import androidx.navigation.compose.composable
-//import androidx.navigation.compose.rememberNavController
-//import androidx.navigation.navArgument
-//import com.example.govix.auth.AuthUiEvent
-//import com.example.govix.auth.AuthViewModel
-//import com.example.govix.auth.ui.LoginScreen
-//import com.example.govix.auth.ui.SignInScreen
-//import com.example.govix.dashboard.ui.DashboardHomeScreen
-//import com.example.govix.hospital.HospitalViewModel
-//import com.example.govix.hospital.HospitalViewModelFactory
-//import com.example.govix.hospital.ui.EmergencyScreen
-//import com.example.govix.hospital.ui.HospitalDetailScreen
-//import com.example.govix.hospital.ui.HospitalListScreen
-//import com.example.govix.hospital.ui.HospitalQueueScreen
-//import com.example.govix.hospital.ui.HospitalRoomsScreen
-//
-//
-//
-//@Composable
-//fun GovixNavGraph(
-//    navController: NavHostController,
-//    authViewModel: AuthViewModel,
-//    startDestination: String,
-//) {
-//    val isLoading by authViewModel.isLoading.collectAsStateWithLifecycle()
-//    val context = LocalContext.current
-//    val hospitalViewModel: HospitalViewModel = viewModel(
-//        factory = HospitalViewModelFactory(context.applicationContext as android.app.Application),
-//    )
-//
-//
-//}
 package com.example.govix.navigation
-import android.annotation.SuppressLint
 import android.app.Application
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -78,7 +28,7 @@ import com.example.govix.auth.AuthViewModel
 import com.example.govix.auth.ui.LoginScreen
 import com.example.govix.auth.ui.SignInScreen
 import com.example.govix.dashboard.ui.DashboardHomeScreen
-import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.HospitalViewModelFactory
 import com.example.govix.hospital.ui.EmergencyScreen
 import com.example.govix.hospital.ui.HospitalDetailScreen
@@ -89,8 +39,6 @@ import com.example.govix.hospital.ui.SavedQueuesScreen
 import com.example.govix.profile.presentation.ProfileViewModel
 import com.example.govix.profile.presentation.ui.EditProfileScreen
 import com.example.govix.profile.presentation.ui.ProfileScreen
-
-
 @Composable
 fun GovixRoot(
     authViewModel: AuthViewModel,
@@ -123,7 +71,6 @@ fun GovixRoot(
             }
         }
     }
-
     if (!hydrated) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -133,7 +80,6 @@ fun GovixRoot(
         }
         return
     }
-
     val startDestination = if (authViewModel.hasSession()) Screen.Home else Screen.Login
     GovixNavGraph(
         navController = navController,
@@ -152,15 +98,12 @@ fun GovixNavGraph(
     val hospitalViewModel: HospitalViewModel = viewModel(
         factory = HospitalViewModelFactory(context.applicationContext as Application),
     )
-
     val bottomNavRoutes = setOf(
         Screen.Home,
         Screen.HospitalList,
         Screen.Saved,
         Screen.Profile,
-
-        // add Tersimpan / Akun routes here when ready
-    )
+        )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
@@ -312,7 +255,6 @@ fun GovixNavGraph(
                     onBack = { navController.popBackStack() }
                 )
             }
-    }
+        }
     }
 }
-

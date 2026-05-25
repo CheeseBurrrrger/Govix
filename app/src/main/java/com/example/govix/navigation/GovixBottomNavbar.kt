@@ -15,31 +15,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.govix.R
-
 private val NavYellow      = Color(0xFFFCB216)
 private val NavUnselected  = Color(0xFF9E9E9E)
 private val NavBackground  = Color.White
 
 sealed class BottomNavRoute(val route: String) {
     object Beranda    : BottomNavRoute("beranda")
-
     object Tersimpan  : BottomNavRoute("tersimpan")
     object Akun       : BottomNavRoute("akun")
 }
-
 data class BottomNavItem(
     val route: String,
     val label: String,
     val iconRes: Int,
 )
-
 private val navItems = listOf(
     BottomNavItem(BottomNavRoute.Beranda.route,   "Beranda",   R.drawable.home),
 
     BottomNavItem(BottomNavRoute.Tersimpan.route, "Tersimpan", R.drawable.saved),
     BottomNavItem(BottomNavRoute.Akun.route,      "Akun",      R.drawable.personn),
 )
-
 @Composable
 fun GovixBottomNavBar(
     currentRoute: String,

@@ -30,11 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.govix.R
-import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.navigation.Screen
 import java.util.Calendar
-
-// ── Brand tokens ─────────────────────────────────────────────────────────────
 private val Yellow        = Color(0xFFFCB216)
 private val YellowLight   = Color(0xFFFDD06A)
 private val YellowPale    = Color(0xFFFFF8E7)
@@ -44,9 +42,6 @@ private val CardBg        = Color.White
 private val TextPrimary   = Color(0xFF1A1A1A)
 private val TextSecondary = Color(0xFF6B6B6B)
 private val TextHint      = Color(0xFFAAAAAA)
-
-// ── Data models ──────────────────────────────────────────────────────────────
-
 data class ServiceItem(
     val name: String,
     val iconRes: Int,
@@ -54,7 +49,6 @@ data class ServiceItem(
     val isHospital: Boolean = false,
     val isEmergency: Boolean = false,
 )
-
 data class StatMetric(
     val label: String,
     val value: String,
@@ -62,9 +56,6 @@ data class StatMetric(
     val iconRes: Int,
     val accentColor: Color = Yellow,
 )
-
-// ── Static data ───────────────────────────────────────────────────────────────
-
 private val quickServices = listOf(
     ServiceItem("Darurat",    R.drawable.logo_aplikasi, Color(0xFFFFEBEB), isEmergency = true),
     ServiceItem("Daftar RS",  R.drawable.layanan,       Color(0xFFE8F4FF), isHospital  = true),
@@ -73,16 +64,12 @@ private val quickServices = listOf(
     ServiceItem("Karsa H.",   R.drawable.rsud_karsa,    Color(0xFFF3E8FF), isHospital  = true),
     ServiceItem("RSUD Haji",  R.drawable.rsud_haji,     Color(0xFFE8F4FF), isHospital  = true),
 )
-
 private val healthStats = listOf(
     StatMetric("Antrean Aktif",       "12",  "hari ini",  R.drawable.logo_aplikasi, Color(0xFFFF6B6B)),
     StatMetric("Rata-rata Tunggu",    "18m", "per pasien",R.drawable.logo_aplikasi, Color(0xFF4ECDC4)),
     StatMetric("Reservasi Bulan Ini", "143", "booking",   R.drawable.logo_aplikasi, Yellow),
     StatMetric("RS Terdekat",         "5",   "pilihan",   R.drawable.logo_aplikasi, Color(0xFF6B8CFF)),
 )
-
-// ── Root screen ───────────────────────────────────────────────────────────────
-
 @Composable
 fun DashboardHomeScreen(
     navController: NavController,
@@ -96,22 +83,17 @@ fun DashboardHomeScreen(
             .background(Surface)
             .verticalScroll(rememberScrollState())
     ) {
-        // ── Hero header ───────────────────────────────────────────
         HeroHeader(userName = userName, onLogoutClick = onLogoutClick)
-
-        // ── Content ───────────────────────────────────────────────
-        Column(
+       Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (-20).dp)           // overlap the header curve
+                .offset(y = (-20).dp)
                 .background(
                     color = Surface,
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 )
                 .padding(top = 24.dp)
         ) {
-
-            // Quick access
             SectionHeader(title = "Layanan Cepat", actionLabel = null)
             Spacer(Modifier.height(12.dp))
             ServiceGrid(
@@ -131,18 +113,12 @@ fun DashboardHomeScreen(
                     }
                 }
             )
-
             Spacer(Modifier.height(28.dp))
-
-            // Booking banner
             BookingBanner(
                 onFindHospital = { navController.navigate(Screen.HospitalList) },
                 onSaved        = { navController.navigate(Screen.Saved) },
             )
-
             Spacer(Modifier.height(28.dp))
-
-            // Stats
             SectionHeader(
                 title       = "Ringkasan Kesehatan",
                 actionLabel = "Lihat semua",
@@ -150,14 +126,10 @@ fun DashboardHomeScreen(
             )
             Spacer(Modifier.height(12.dp))
             StatsRow(metrics = healthStats)
-
-            Spacer(Modifier.height(80.dp))   // bottom nav clearance
+            Spacer(Modifier.height(80.dp))
         }
     }
 }
-
-// ── Hero header ───────────────────────────────────────────────────────────────
-
 @Composable
 private fun HeroHeader(
     userName: String,
@@ -170,7 +142,6 @@ private fun HeroHeader(
         hour < 18 -> "Selamat sore"
         else      -> "Selamat malam"
     }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -179,7 +150,7 @@ private fun HeroHeader(
                     colors = listOf(YellowDeep, Yellow, YellowLight)
                 )
             )
-            .padding(bottom = 36.dp)   // extra bottom so the content overlap looks clean
+            .padding(bottom = 36.dp)
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
         Row(
@@ -187,7 +158,6 @@ private fun HeroHeader(
             verticalAlignment   = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // ── Avatar + greeting ─────────────────────────────────
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
@@ -222,8 +192,6 @@ private fun HeroHeader(
                     )
                 }
             }
-
-            // ── Logout button ─────────────────────────────────────
             if (onLogoutClick != null) {
                 Column(
                     modifier              = Modifier
@@ -251,9 +219,6 @@ private fun HeroHeader(
         }
     }
 }
-
-// ── Section header ────────────────────────────────────────────────────────────
-
 @Composable
 private fun SectionHeader(
     title: String,
@@ -294,9 +259,6 @@ private fun SectionHeader(
         }
     }
 }
-
-// ── Service grid ──────────────────────────────────────────────────────────────
-
 @Composable
 private fun ServiceGrid(
     services: List<ServiceItem>,
@@ -321,7 +283,6 @@ private fun ServiceGrid(
                         onClick  = { onServiceClick(service) }
                     )
                 }
-                // Fill empty slots so last row aligns left
                 repeat(3 - rowItems.size) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -373,9 +334,6 @@ private fun ServiceCard(
         )
     }
 }
-
-// ── Booking banner ────────────────────────────────────────────────────────────
-
 @Composable
 private fun BookingBanner(
     onFindHospital: () -> Unit,
@@ -393,7 +351,6 @@ private fun BookingBanner(
                 )
             )
     ) {
-        // Decorative circle accent
         Box(
             modifier = Modifier
                 .size(120.dp)
@@ -451,9 +408,6 @@ private fun BookingBanner(
         }
     }
 }
-
-// ── Stats row ─────────────────────────────────────────────────────────────────
-
 @Composable
 private fun StatsRow(metrics: List<StatMetric>) {
     LazyRow(
@@ -465,7 +419,6 @@ private fun StatsRow(metrics: List<StatMetric>) {
         }
     }
 }
-
 @Composable
 private fun StatCard(metric: StatMetric) {
     Column(

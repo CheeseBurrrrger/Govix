@@ -32,7 +32,6 @@ import com.example.govix.profile.presentation.ProfileState
 import com.example.govix.profile.presentation.ProfileViewModel
 import com.example.govix.profile.presentation.UpdateProfileState
 
-// ── Brand tokens (mirror ProfileScreen) ──────────────────────────
 private val Yellow      = Color(0xFFFCB216)
 private val YellowDeep  = Color(0xFFE09A00)
 private val YellowLight = Color(0xFFFFD76E)
@@ -52,8 +51,6 @@ fun EditProfileScreen(
     val profileState by viewModel.profileState.collectAsStateWithLifecycle()
     val updateState  by viewModel.updateState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-
-    // ── Pre-fill from loaded profile ──────────────────────────────
     var firstName by remember { mutableStateOf("") }
     var lastName  by remember { mutableStateOf("") }
     var phone     by remember { mutableStateOf("") }
@@ -63,7 +60,6 @@ fun EditProfileScreen(
     var gender    by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
-
     LaunchedEffect(profileState) {
         if (profileState is ProfileState.Success) {
             val p = (profileState as ProfileState.Success).profile
@@ -77,7 +73,6 @@ fun EditProfileScreen(
             birthDate = p.birthDate.orEmpty()
         }
     }
-
     LaunchedEffect(updateState) {
         when (updateState) {
             is UpdateProfileState.Success -> {
@@ -96,16 +91,12 @@ fun EditProfileScreen(
             else -> Unit
         }
     }
-
     val isLoading = updateState is UpdateProfileState.Loading
-    val isFormDirty = firstName.isNotBlank() || lastName.isNotBlank()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Surface)
     ) {
-        // ── Top bar ───────────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -129,8 +120,6 @@ fun EditProfileScreen(
                 modifier   = Modifier.align(Alignment.Center)
             )
         }
-
-        // ── Scrollable form ───────────────────────────────────────
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -138,7 +127,6 @@ fun EditProfileScreen(
                 .padding(horizontal = 20.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ── Identity section ──────────────────────────────────
             EditSection(title = "Identitas") {
                 Row(
                     modifier              = Modifier.fillMaxWidth(),
@@ -179,7 +167,7 @@ fun EditProfileScreen(
                 EditDropdownField(
                     label    = "Jenis Kelamin",
                     icon     = Icons.Outlined.Wc,
-                    value    = when (gender.uppercase()) {   // display friendly label from stored "L"/"P"
+                    value    = when (gender.uppercase()) {
                         "L" -> "Laki-laki"
                         "P" -> "Perempuan"
                         else -> gender
@@ -194,16 +182,12 @@ fun EditProfileScreen(
                             }
                         }
                 )
-
-                // Birth date — calendar picker
                 EditDateField(
                     label          = "Tanggal Lahir",
                     value          = birthDate,
                     onDateSelected = { birthDate = it }
                 )
             }
-
-            // ── Contact section ───────────────────────────────────
             EditSection(title = "Kontak & Lokasi") {
                 EditField(
                     label         = "No. HP",
@@ -213,7 +197,6 @@ fun EditProfileScreen(
                     keyboardType  = KeyboardType.Phone,
                     onValueChange = { phone = it }
                 )
-
                 EditField(
                     label         = "Wilayah",
                     value         = region,
@@ -221,7 +204,6 @@ fun EditProfileScreen(
                     placeholder   = "Kota / Kabupaten",
                     onValueChange = { region = it }
                 )
-
                 EditField(
                     label         = "Alamat",
                     value         = address,
@@ -231,8 +213,6 @@ fun EditProfileScreen(
                 )
             }
         }
-
-        // ── Save button ───────────────────────────────────────────
         Surface(
             modifier      = Modifier.fillMaxWidth(),
             shadowElevation = 8.dp,
@@ -276,9 +256,6 @@ fun EditProfileScreen(
         }
     }
 }
-
-// ── Section wrapper ───────────────────────────────────────────────
-
 @Composable
 private fun EditSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column(
@@ -294,9 +271,6 @@ private fun EditSection(title: String, content: @Composable ColumnScope.() -> Un
         content()
     }
 }
-
-// ── Text input field ──────────────────────────────────────────────
-
 @Composable
 private fun EditField(
     label: String,
@@ -339,9 +313,6 @@ private fun EditField(
         }
     }
 }
-
-// ── Dropdown field ────────────────────────────────────────────────
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditDropdownField(
@@ -386,9 +357,6 @@ private fun EditDropdownField(
         }
     }
 }
-
-// ── Date picker field ─────────────────────────────────────────────
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditDateField(
@@ -398,7 +366,6 @@ private fun EditDateField(
 ) {
     var showDialog      by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-
     Column {
         Text(label, fontSize = 12.sp, color = TextHint, fontWeight = FontWeight.Medium)
         Spacer(Modifier.height(6.dp))
@@ -435,14 +402,12 @@ private fun EditDateField(
             }
         }
     }
-
     if (showDialog) {
         DatePickerDialog(
             onDismissRequest = { showDialog = false },
             confirmButton    = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        // format as YYYY-MM-DD to match backend expectation
                         val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
                         onDateSelected(sdf.format(java.util.Date(millis)))
                     }
@@ -465,9 +430,4 @@ private fun EditDateField(
             DatePicker(state = datePickerState, showModeToggle = true)
         }
     }
-}
-private fun String.toGenderApiValue(): String = when (trim().uppercase()) {
-    "LAKI - LAKI", "LAKI-LAKI", "L" -> "L"
-    "PEREMPUAN", "P"                 -> "P"
-    else                             -> this
 }

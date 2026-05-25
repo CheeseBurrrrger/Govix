@@ -5,7 +5,6 @@ object Screen {
     const val Register = "register"
     const val Home = "home"
     const val Saved = "saved"
-
     const val HospitalList = "hospital_list"
     const val HospitalDetail = "hospital_detail/{hospitalId}"
     const val HospitalRooms = "hospital_rooms/{hospitalId}"

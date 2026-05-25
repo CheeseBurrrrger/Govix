@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.govix.data.remote.dto.QueueDto
-import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.ui.components.HospitalBlueHeader
 import com.example.govix.hospital.ui.components.HospitalPrimary
 

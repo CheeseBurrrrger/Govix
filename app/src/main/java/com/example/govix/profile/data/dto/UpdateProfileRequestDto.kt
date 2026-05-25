@@ -1,7 +1,6 @@
 package com.example.govix.profile.data.dto
 
 import com.google.gson.annotations.SerializedName
-
 data class UpdateProfileRequestDto(
     @SerializedName("first_name") val firstName: String,
     @SerializedName("last_name")  val lastName: String,

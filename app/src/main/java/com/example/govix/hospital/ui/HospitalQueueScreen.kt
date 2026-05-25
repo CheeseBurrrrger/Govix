@@ -40,7 +40,7 @@ import com.example.govix.core.util.parseDdMmYyyyToIsoOrNull
 import com.example.govix.data.remote.dto.DoctorDto
 import com.example.govix.data.remote.dto.DoctorScheduleDto
 import com.example.govix.data.remote.dto.PolyclinicDto
-import com.example.govix.hospital.HospitalViewModel
+import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.QueueBookingState
 import com.example.govix.hospital.ui.components.HospitalBlueHeader
 import com.example.govix.hospital.ui.components.HospitalPrimary

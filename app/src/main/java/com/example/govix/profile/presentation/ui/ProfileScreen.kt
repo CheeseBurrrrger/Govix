@@ -30,8 +30,6 @@ import com.example.govix.R
 import com.example.govix.profile.domain.model.Profile
 import com.example.govix.profile.presentation.ProfileState
 import com.example.govix.profile.presentation.ProfileViewModel
-
-// ── Brand tokens ─────────────────────────────────────────────────
 private val Yellow      = Color(0xFFFCB216)
 private val YellowDeep  = Color(0xFFE09A00)
 private val YellowLight = Color(0xFFFFD76E)
@@ -73,7 +71,6 @@ fun ProfileScreen(
         else -> Unit
     }
 }
-
 @Composable
 private fun ProfileContent(
     profile: Profile,
@@ -85,7 +82,6 @@ private fun ProfileContent(
             .background(Surface)
             .verticalScroll(rememberScrollState())
     ) {
-        // ── Hero header ───────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +93,6 @@ private fun ProfileContent(
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Avatar
                 Box(
                     modifier = Modifier
                         .size(96.dp)
@@ -123,8 +118,6 @@ private fun ProfileContent(
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-
-                // Name — fallback chain: fullName → firstName+lastName → username
                 val displayName = when {
                     !profile.fullName.isNullOrBlank()  -> profile.fullName
                     !profile.firstName.isNullOrBlank() ->
@@ -152,7 +145,6 @@ private fun ProfileContent(
             }
         }
 
-        // ── Cards overlap the header ──────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,7 +152,6 @@ private fun ProfileContent(
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ── Identity card ─────────────────────────────────────
             ProfileCard(title = "Identitas") {
                 ProfileRow(Icons.Outlined.Person,       "Nama Depan",  profile.firstName.orDash())
                 ProfileRow(Icons.Outlined.Person,       "Nama Belakang", profile.lastName.orDash())
@@ -175,18 +166,13 @@ private fun ProfileContent(
                 )
                 ProfileRow(Icons.Outlined.Cake,         "Tanggal Lahir", profile.birthDate.orDash(), isLast = true)
             }
-
-            // ── Contact card ──────────────────────────────────────
             ProfileCard(title = "Kontak & Lokasi") {
                 ProfileRow(Icons.Outlined.Email,        "Email",    profile.email)
                 ProfileRow(Icons.Outlined.Phone,        "No. HP",   profile.phone.orDash())
                 ProfileRow(Icons.Outlined.LocationCity, "Wilayah",  profile.region.orDash())
                 ProfileRow(Icons.Outlined.Home,         "Alamat",   profile.address.orDash(), isLast = true)
             }
-
             Spacer(Modifier.height(4.dp))
-
-            // ── Edit button ───────────────────────────────────────
             Button(
                 onClick        = onEditClick,
                 modifier       = Modifier
@@ -205,9 +191,6 @@ private fun ProfileContent(
         }
     }
 }
-
-// ── Reusable card wrapper ─────────────────────────────────────────
-
 @Composable
 private fun ProfileCard(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column(
@@ -223,9 +206,6 @@ private fun ProfileCard(title: String, content: @Composable ColumnScope.() -> Un
         content()
     }
 }
-
-// ── Single profile row ────────────────────────────────────────────
-
 @Composable
 private fun ProfileRow(
     icon: ImageVector,
@@ -259,7 +239,4 @@ private fun ProfileRow(
         HorizontalDivider(color = Divider, thickness = 1.dp)
     }
 }
-
-// ── Extension ────────────────────────────────────────────────────
-
 private fun String?.orDash() = if (isNullOrBlank()) "—" else this

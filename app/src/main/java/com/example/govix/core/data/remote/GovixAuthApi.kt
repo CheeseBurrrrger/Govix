@@ -1,4 +1,4 @@
-package com.example.govix.data.remote
+package com.example.govix.core.data.remote
 
 import com.example.govix.data.remote.dto.AuthWrappedResponse
 import com.example.govix.data.remote.dto.ChangePasswordRequest

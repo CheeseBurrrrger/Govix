@@ -3,6 +3,7 @@ package com.example.govix.hospital.domain.model
 data class RoomSummary(
     val total: Int,
     val available: Int,
+    val occupied: Int = total - available,
 )
 
 data class Room(

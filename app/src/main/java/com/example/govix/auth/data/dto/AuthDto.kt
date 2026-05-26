@@ -18,9 +18,7 @@ data class RegisterRequest(
     val nik: String,
     val region: String,
     val address: String,
-    /** Prefer ISO `yyyy-MM-dd`; backend may also accept other formats. */
     @SerializedName("birth_date") val birthDate: String,
-    /** Majadigi DB uses `L` / `P`. */
     val gender: String,
 )
 
@@ -34,7 +32,6 @@ data class SocialLoginRequest(
     @SerializedName("idToken") val idToken: String,
 )
 
-/** Typical `{ success, message, data: { token } }` wrapper. */
 data class AuthWrappedResponse(
     val success: Boolean? = null,
     val message: String? = null,

@@ -1,7 +1,7 @@
-package com.example.govix.data.repository
+package com.example.govix.auth.domain.repository
 
 import com.example.govix.core.data.TokenDataStore
-import com.example.govix.data.remote.GovixAuthApi
+import com.example.govix.core.data.remote.GovixAuthApi
 import com.example.govix.data.remote.dto.AuthWrappedResponse
 import com.example.govix.data.remote.dto.ChangePasswordRequest
 import com.example.govix.data.remote.dto.LoginRequest

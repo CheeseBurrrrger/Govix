@@ -2,32 +2,17 @@ package com.example.govix.hospital.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -37,13 +22,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.govix.core.data.ProfileDraftDataStore
 import com.example.govix.core.util.parseDdMmYyyyToIsoOrNull
-import com.example.govix.data.remote.dto.DoctorDto
-import com.example.govix.data.remote.dto.DoctorScheduleDto
-import com.example.govix.data.remote.dto.PolyclinicDto
+import com.example.govix.hospital.domain.model.Doctor
+import com.example.govix.hospital.domain.model.DoctorSchedule
+import com.example.govix.hospital.domain.model.Polyclinic
 import com.example.govix.hospital.presentation.HospitalViewModel
-import com.example.govix.hospital.QueueBookingState
-import com.example.govix.hospital.ui.components.HospitalBlueHeader
+import com.example.govix.hospital.presentation.QueueBookingState
 import com.example.govix.hospital.ui.components.HospitalPrimary
+
+private val AccentYellow = Color(0xFFFCB216)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,9 +43,9 @@ fun HospitalQueueScreen(
     val bookingState by viewModel.bookingState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    var selectedPoli by remember { mutableStateOf<PolyclinicDto?>(null) }
-    var selectedDoctor by remember { mutableStateOf<DoctorDto?>(null) }
-    var selectedSchedule by remember { mutableStateOf<DoctorScheduleDto?>(null) }
+    var selectedPoli by remember { mutableStateOf<Polyclinic?>(null) }
+    var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
+    var selectedSchedule by remember { mutableStateOf<DoctorSchedule?>(null) }
     var poliExpanded by remember { mutableStateOf(false) }
     var doctorExpanded by remember { mutableStateOf(false) }
     var scheduleExpanded by remember { mutableStateOf(false) }
@@ -70,36 +56,24 @@ fun HospitalQueueScreen(
     var patientNik by remember { mutableStateOf("") }
     var patientBirthDate by remember { mutableStateOf("") }
 
-    LaunchedEffect(hospitalId) {
-        viewModel.loadPolyclinics(hospitalId)
-    }
+    LaunchedEffect(hospitalId) { viewModel.loadPolyclinics(hospitalId) }
 
     LaunchedEffect(Unit) {
         val draft = ProfileDraftDataStore(context.applicationContext).readDraftOrNull()
         if (draft != null) {
-            val fallbackName = draft.fullName.ifBlank {
+            val name = draft.fullName.ifBlank {
                 listOf(draft.firstName, draft.lastName).filter { it.isNotBlank() }.joinToString(" ")
             }
-            if (patientName.isBlank()) patientName = fallbackName
+            if (patientName.isBlank()) patientName = name
             if (patientNik.isBlank()) patientNik = draft.nik
             if (patientBirthDate.isBlank()) patientBirthDate = draft.birthDate
-        }
-    }
-
-    LaunchedEffect(state.error) {
-        state.error?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
         }
     }
 
     LaunchedEffect(bookingState) {
         when (val s = bookingState) {
             is QueueBookingState.Success -> {
-                Toast.makeText(
-                    context,
-                    "Booking berhasil. Nomor antrean: ${s.queue.queueNumber ?: "-"}",
-                    Toast.LENGTH_LONG,
-                ).show()
+                Toast.makeText(context, "Booking berhasil. Nomor antrean: ${s.queueNumber}", Toast.LENGTH_LONG).show()
                 viewModel.resetBookingState()
             }
             is QueueBookingState.Error -> {
@@ -113,208 +87,229 @@ fun HospitalQueueScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(Color(0xFFF7F7F7)),
     ) {
-        HospitalBlueHeader(title = "Informasi Antrean Pasien", onBack = onBack)
+        // Header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AccentYellow)
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+        ) {
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White)
+                }
+                Text("Daftar Antrean", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            }
+        }
 
         if (state.isLoadingPolyclinics && state.polyclinics.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.padding(32.dp))
+            Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                CircularProgressIndicator(color = AccentYellow)
+            }
             return
         }
 
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Rumah Sakit", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text(hospitalName, modifier = Modifier.padding(bottom = 16.dp))
+            // Hospital name
+            SectionCard {
+                FieldLabel("Rumah Sakit")
+                Text(hospitalName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            }
 
-            Text("Pilih Poli", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            ExposedDropdownMenuBox(expanded = poliExpanded, onExpandedChange = { poliExpanded = it }) {
-                OutlinedTextField(
-                    value = selectedPoli?.name ?: "-Pilih-",
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = poliExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                )
-                ExposedDropdownMenu(expanded = poliExpanded, onDismissRequest = { poliExpanded = false }) {
-                    state.polyclinics.forEach { poli ->
-                        DropdownMenuItem(
-                            text = { Text(poli.name.orEmpty()) },
-                            onClick = {
-                                selectedPoli = poli
-                                selectedDoctor = null
-                                selectedSchedule = null
-                                poliExpanded = false
-                                poli.id?.let { viewModel.loadDoctors(it) }
-                            },
-                        )
+            // Polyclinic
+            SectionCard {
+                FieldLabel("Pilih Poli")
+                ExposedDropdownMenuBox(expanded = poliExpanded, onExpandedChange = { poliExpanded = it }) {
+                    OutlinedTextField(
+                        value = selectedPoli?.name ?: "— Pilih Poli —",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = poliExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                    )
+                    ExposedDropdownMenu(expanded = poliExpanded, onDismissRequest = { poliExpanded = false }) {
+                        state.polyclinics.forEach { poli ->
+                            DropdownMenuItem(
+                                text = { Text(poli.name) },
+                                onClick = {
+                                    selectedPoli = poli; selectedDoctor = null; selectedSchedule = null
+                                    poliExpanded = false; viewModel.loadDoctors(poli.id)
+                                },
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Pilih Dokter", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            ExposedDropdownMenuBox(expanded = doctorExpanded, onExpandedChange = { doctorExpanded = it }) {
-                OutlinedTextField(
-                    value = selectedDoctor?.let { formatDoctor(it) } ?: "-Pilih-",
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = selectedPoli != null && !state.isLoadingDoctors,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = doctorExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                )
-                ExposedDropdownMenu(expanded = doctorExpanded, onDismissRequest = { doctorExpanded = false }) {
-                    state.doctors.forEach { doctor ->
-                        DropdownMenuItem(
-                            text = { Text(formatDoctor(doctor)) },
-                            onClick = {
-                                selectedDoctor = doctor
-                                selectedSchedule = null
-                                doctorExpanded = false
-                                doctor.id?.let { viewModel.loadSchedules(it) }
-                            },
-                        )
+            // Doctor
+            SectionCard {
+                FieldLabel("Pilih Dokter")
+                ExposedDropdownMenuBox(expanded = doctorExpanded, onExpandedChange = { doctorExpanded = it }) {
+                    OutlinedTextField(
+                        value = selectedDoctor?.let { formatDoctor(it) } ?: "— Pilih Dokter —",
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = selectedPoli != null && !state.isLoadingDoctors,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = doctorExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                    )
+                    ExposedDropdownMenu(expanded = doctorExpanded, onDismissRequest = { doctorExpanded = false }) {
+                        state.doctors.forEach { doctor ->
+                            DropdownMenuItem(
+                                text = { Text(formatDoctor(doctor)) },
+                                onClick = {
+                                    selectedDoctor = doctor; selectedSchedule = null
+                                    doctorExpanded = false; viewModel.loadSchedules(doctor.id)
+                                },
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Pilih Jadwal", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            ExposedDropdownMenuBox(expanded = scheduleExpanded, onExpandedChange = { scheduleExpanded = it }) {
-                OutlinedTextField(
-                    value = selectedSchedule?.let { formatSchedule(it) } ?: "-Pilih-",
-                    onValueChange = {},
-                    readOnly = true,
-                    enabled = selectedDoctor != null && !state.isLoadingSchedules,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = scheduleExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                )
-                ExposedDropdownMenu(expanded = scheduleExpanded, onDismissRequest = { scheduleExpanded = false }) {
-                    state.schedules.forEach { schedule ->
-                        DropdownMenuItem(
-                            text = { Text(formatSchedule(schedule)) },
-                            onClick = {
-                                selectedSchedule = schedule
-                                scheduleExpanded = false
-                            },
-                        )
+            // Schedule
+            SectionCard {
+                FieldLabel("Pilih Jadwal")
+                ExposedDropdownMenuBox(expanded = scheduleExpanded, onExpandedChange = { scheduleExpanded = it }) {
+                    OutlinedTextField(
+                        value = selectedSchedule?.let { formatSchedule(it) } ?: "— Pilih Jadwal —",
+                        onValueChange = {},
+                        readOnly = true,
+                        enabled = selectedDoctor != null && !state.isLoadingSchedules,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = scheduleExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                    )
+                    ExposedDropdownMenu(expanded = scheduleExpanded, onDismissRequest = { scheduleExpanded = false }) {
+                        state.schedules.forEach { schedule ->
+                            val label = formatSchedule(schedule)
+                            DropdownMenuItem(
+                                text = {
+                                    Column {
+                                        Text(label, fontWeight = FontWeight.SemiBold)
+                                        if (schedule.isFull) {
+                                            Text("Penuh", fontSize = 11.sp, color = Color(0xFFE53935))
+                                        }
+                                    }
+                                },
+                                onClick = { if (!schedule.isFull) { selectedSchedule = schedule; scheduleExpanded = false } },
+                                enabled = !schedule.isFull,
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            // Patient data
+            SectionCard {
+                FieldLabel("Data Pasien")
+                OutlinedTextField(
+                    value = patientName, onValueChange = { patientName = it },
+                    label = { Text("Nama Pasien") }, modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = patientNik, onValueChange = { patientNik = it },
+                    label = { Text("NIK (16 digit)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = patientBirthDate, onValueChange = { patientBirthDate = it },
+                    label = { Text("Tanggal Lahir (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                )
+            }
 
-            Text("Data Pasien", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = patientName,
-                onValueChange = { patientName = it },
-                label = { Text("Nama Pasien") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = patientNik,
-                onValueChange = { patientNik = it },
-                label = { Text("NIK Pasien") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = patientBirthDate,
-                onValueChange = { patientBirthDate = it },
-                label = { Text("Tanggal Lahir Pasien (YYYY-MM-DD)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            )
+            // Booking data
+            SectionCard {
+                FieldLabel("Data Booking")
+                OutlinedTextField(
+                    value = scheduleDate, onValueChange = { scheduleDate = it },
+                    label = { Text("Tanggal Berobat (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = queueNumber, onValueChange = { queueNumber = it },
+                    label = { Text("Nomor Antrean") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                )
+            }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Data Booking", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = scheduleDate,
-                onValueChange = { scheduleDate = it },
-                label = { Text("Tanggal Berobat (YYYY-MM-DD)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = queueNumber,
-                onValueChange = { queueNumber = it },
-                label = { Text("Nomor Antrean") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    val scheduleId = selectedSchedule?.id
-                    if (scheduleId == null) return@Button
+                    val sid = selectedSchedule?.id ?: return@Button
                     val qn = queueNumber.trim().toIntOrNull()
-                    val scheduleDateIso = parseDdMmYyyyToIsoOrNull(scheduleDate) ?: scheduleDate.trim()
-                    val birthDateIso = run {
-                        val s = patientBirthDate.trim()
-                        if (s.length >= 10 && Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(s.substring(0, 10))) s.substring(0, 10)
-                        else parseDdMmYyyyToIsoOrNull(s) ?: s
-                    }
+                    val sdIso = parseDdMmYyyyToIsoOrNull(scheduleDate) ?: scheduleDate.trim()
+                    val bdRaw = patientBirthDate.trim()
+                    val bdIso = if (Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(bdRaw)) bdRaw
+                    else parseDdMmYyyyToIsoOrNull(bdRaw) ?: bdRaw
                     when {
                         patientName.isBlank() -> Toast.makeText(context, "Nama pasien wajib diisi.", Toast.LENGTH_LONG).show()
-                        patientNik.length != 16 || !patientNik.all { it.isDigit() } -> Toast.makeText(context, "NIK pasien harus 16 digit.", Toast.LENGTH_LONG).show()
-                        patientBirthDate.isBlank() -> Toast.makeText(context, "Tanggal lahir pasien wajib diisi.", Toast.LENGTH_LONG).show()
-                        !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(birthDateIso) -> Toast.makeText(context, "Tanggal lahir pasien harus YYYY-MM-DD atau DD/MM/YYYY.", Toast.LENGTH_LONG).show()
-                        scheduleDate.isBlank() -> Toast.makeText(context, "Tanggal berobat wajib diisi.", Toast.LENGTH_LONG).show()
-                        !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(scheduleDateIso) -> Toast.makeText(context, "Tanggal berobat harus YYYY-MM-DD atau DD/MM/YYYY.", Toast.LENGTH_LONG).show()
+                        patientNik.length != 16 || !patientNik.all { it.isDigit() } -> Toast.makeText(context, "NIK harus 16 digit.", Toast.LENGTH_LONG).show()
+                        !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(bdIso) -> Toast.makeText(context, "Format tanggal lahir salah.", Toast.LENGTH_LONG).show()
+                        !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(sdIso) -> Toast.makeText(context, "Format tanggal berobat salah.", Toast.LENGTH_LONG).show()
                         qn == null || qn <= 0 -> Toast.makeText(context, "Nomor antrean tidak valid.", Toast.LENGTH_LONG).show()
-                        else -> viewModel.bookQueue(
-                            scheduleId = scheduleId,
-                            queueNumber = qn,
-                            scheduleDate = scheduleDateIso,
-                            patientName = patientName,
-                            patientNik = patientNik,
-                            patientBirthDate = birthDateIso,
-                        )
+                        else -> viewModel.bookQueue(sid, qn, sdIso, patientName, patientNik, bdIso)
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                enabled = selectedPoli != null && selectedDoctor != null && selectedSchedule != null && bookingState !is QueueBookingState.Loading,
-                colors = ButtonDefaults.buttonColors(containerColor = HospitalPrimary),
-                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                enabled = selectedPoli != null && selectedDoctor != null && selectedSchedule != null
+                        && bookingState !is QueueBookingState.Loading,
+                colors = ButtonDefaults.buttonColors(containerColor = AccentYellow),
+                shape = RoundedCornerShape(14.dp),
             ) {
                 if (bookingState is QueueBookingState.Loading) {
-                    CircularProgressIndicator(color = Color.White)
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Konfirmasi", fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Konfirmasi Booking", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
                 }
             }
         }
     }
 }
 
-private fun formatDoctor(doctor: DoctorDto): String {
-    val title = doctor.title?.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
-    return "${doctor.name.orEmpty()}$title"
+@Composable
+private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        content = content,
+    )
 }
 
-private fun formatSchedule(schedule: DoctorScheduleDto): String {
-    val day = schedule.dayOfWeek.orEmpty()
-    val start = schedule.startTime?.take(5).orEmpty()
-    val end = schedule.endTime?.take(5).orEmpty()
-    return "$day · $start - $end"
+@Composable
+private fun FieldLabel(text: String) {
+    Text(text, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF9E9E9E))
+    Spacer(Modifier.height(4.dp))
+}
+
+private fun formatDoctor(doctor: Doctor): String {
+    val title = doctor.title.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
+    return "${doctor.name}$title"
+}
+
+private fun formatSchedule(schedule: DoctorSchedule): String {
+    val start = schedule.startTime.take(5)
+    val end = schedule.endTime.take(5)
+    return "${schedule.dayOfWeek} · $start–$end"
 }

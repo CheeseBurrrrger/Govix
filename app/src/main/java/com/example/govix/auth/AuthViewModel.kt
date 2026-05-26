@@ -11,7 +11,7 @@ import com.example.govix.core.network.GovixRetrofit
 import com.example.govix.core.util.genderLabelToApi
 import com.example.govix.core.util.parseDdMmYyyyToIsoOrNull
 import com.example.govix.data.remote.dto.RegisterRequest
-import com.example.govix.data.repository.AuthRepository
+import com.example.govix.auth.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -117,7 +117,6 @@ class AuthViewModel(
                 .onSuccess { loggedInWithToken ->
                     profileDraftDataStore.saveFromRegister(body)
                     if (loggedInWithToken) {
-                        // Backend may return a token on register; app flow expects user to login explicitly.
                         tokenDataStore.clearToken()
                     }
                     _events.emit(AuthUiEvent.NavigateToLogin("Berhasil mendaftar. Silakan masuk."))

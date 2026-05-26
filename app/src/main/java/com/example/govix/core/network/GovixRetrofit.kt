@@ -2,9 +2,9 @@ package com.example.govix.core.network
 
 import com.example.govix.BuildConfig
 import com.example.govix.core.data.TokenDataStore
-import com.example.govix.data.remote.GovixAuthApi
-import com.example.govix.data.remote.GovixHospitalApi
-import com.example.govix.data.remote.GovixQueueApi
+import com.example.govix.core.data.remote.GovixAuthApi
+import com.example.govix.core.data.remote.GovixHospitalApi
+import com.example.govix.core.data.remote.GovixQueueApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit

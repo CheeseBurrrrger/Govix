@@ -29,7 +29,6 @@ import com.example.govix.auth.ui.LoginScreen
 import com.example.govix.auth.ui.SignInScreen
 import com.example.govix.dashboard.ui.DashboardHomeScreen
 import com.example.govix.hospital.presentation.HospitalViewModel
-import com.example.govix.hospital.HospitalViewModelFactory
 import com.example.govix.hospital.ui.EmergencyScreen
 import com.example.govix.hospital.ui.HospitalDetailScreen
 import com.example.govix.hospital.ui.HospitalListScreen
@@ -95,9 +94,8 @@ fun GovixNavGraph(
 ) {
     val isLoading by authViewModel.isLoading.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val hospitalViewModel: HospitalViewModel = viewModel(
-        factory = HospitalViewModelFactory(context.applicationContext as Application),
-    )
+    val hospitalViewModel: HospitalViewModel = hiltViewModel()
+
     val bottomNavRoutes = setOf(
         Screen.Home,
         Screen.HospitalList,

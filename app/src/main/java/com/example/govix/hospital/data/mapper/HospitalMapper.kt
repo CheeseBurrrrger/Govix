@@ -8,7 +8,6 @@ import com.example.govix.data.remote.dto.PolyclinicDto
 import com.example.govix.data.remote.dto.RoomAvailabilityItemDto
 import com.example.govix.data.remote.dto.RoomAvailabilityPayloadDto
 import com.example.govix.data.remote.dto.RoomAvailabilitySummaryDto
-import com.example.govix.data.repository.HospitalDetailBundle
 import com.example.govix.hospital.domain.model.Doctor
 import com.example.govix.hospital.domain.model.DoctorSchedule
 import com.example.govix.hospital.domain.model.Hospital
@@ -19,6 +18,11 @@ import com.example.govix.hospital.domain.model.Room
 import com.example.govix.hospital.domain.model.RoomAvailability
 import com.example.govix.hospital.domain.model.RoomSummary
 
+
+data class HospitalDetailBundle(
+    val hospital: HospitalDto,
+    val operationalInfo: List<OperationalInfoDto>,
+)
 fun HospitalDto.toDomain() = Hospital(
     id = id ?: 0,
     name = name.orEmpty(),

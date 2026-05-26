@@ -40,12 +40,9 @@ import java.util.Date
 import java.util.Locale
 
 private val GovixYellow      = Color(0xFFFCB216)
-private val GovixYellowLight = Color(0xFFFDD06A)
 private val PlaceholderGray  = Color(0xFF9E9E9E)
 private val LabelGray        = Color(0xFF424242)
 private val DividerGray      = Color(0xFFE0E0E0)
-private val ErrorRed         = Color(0xFFE53935)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(

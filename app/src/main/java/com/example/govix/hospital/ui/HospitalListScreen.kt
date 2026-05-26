@@ -1,33 +1,28 @@
 package com.example.govix.hospital.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.govix.data.remote.dto.HospitalDto
+import com.example.govix.hospital.domain.model.Hospital
 import com.example.govix.hospital.presentation.HospitalViewModel
-import com.example.govix.hospital.ui.components.ServiceLayananCard
+import com.example.govix.hospital.ui.components.HospitalPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,32 +41,45 @@ fun HospitalListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Layanan") },
+                title = { Text("Layanan Kesehatan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = HospitalPrimary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                ),
             )
         },
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color(0xFFF7F7F7))
                 .padding(padding),
         ) {
             when {
                 state.isLoading && state.hospitals.isEmpty() -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = HospitalPrimary,
+                    )
                 }
                 state.error != null && state.hospitals.isEmpty() -> {
-                    Text(
-                        text = state.error ?: "",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(24.dp),
-                        color = Color.Red,
-                    )
+                    Column(
+                        modifier = Modifier.align(Alignment.Center).padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(state.error ?: "", color = Color(0xFFE53935))
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.loadHospitals() },
+                            colors = ButtonDefaults.buttonColors(containerColor = HospitalPrimary),
+                        ) { Text("Coba Lagi", color = Color.White) }
+                    }
                 }
                 else -> {
                     Column(
@@ -79,28 +87,22 @@ fun HospitalListScreen(
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text(
-                            text = "Layanan Kesehatan",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
                         state.hospitals.forEach { hospital ->
-                            HospitalListItem(
+                            HospitalCard(
                                 hospital = hospital,
-                                onClick = {
-                                    val id = hospital.id ?: return@HospitalListItem
-                                    onHospitalClick(id, hospital.name.orEmpty())
-                                },
+                                onClick = { onHospitalClick(hospital.id, hospital.name) },
                             )
                         }
+                        Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Layanan Lainnya",
-                            fontSize = 18.sp,
+                            "Layanan Lainnya",
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 16.dp),
+                            color = Color(0xFF1A1A1A),
                         )
-                        ServiceLayananCard(title = "Nomor Darurat", onClick = onEmergencyClick)
+                        EmergencyCard(onClick = onEmergencyClick)
                     }
                 }
             }
@@ -109,13 +111,68 @@ fun HospitalListScreen(
 }
 
 @Composable
-private fun HospitalListItem(
-    hospital: HospitalDto,
-    onClick: () -> Unit,
-) {
-    val title = buildString {
-        append(hospital.name.orEmpty())
-        hospital.city?.takeIf { it.isNotBlank() }?.let { append(" · $it") }
+private fun HospitalCard(hospital: Hospital, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFFFF3D6)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = hospital.shortName.take(2).ifBlank { hospital.name.take(2) }.uppercase(),
+                fontWeight = FontWeight.ExtraBold,
+                color = HospitalPrimary,
+                fontSize = 16.sp,
+            )
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(hospital.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF1A1A1A))
+            if (hospital.city.isNotBlank()) {
+                Text(hospital.city, fontSize = 12.sp, color = Color(0xFF9E9E9E))
+            }
+        }
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = Color(0xFFAAAAAA),
+        )
     }
-    ServiceLayananCard(title = title, onClick = onClick)
+}
+
+@Composable
+private fun EmergencyCard(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFFFEBEB))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFFFCDD2)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("🚨", fontSize = 20.sp)
+        }
+        Spacer(Modifier.width(14.dp))
+        Text("Nomor Darurat", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFFE53935))
+    }
 }

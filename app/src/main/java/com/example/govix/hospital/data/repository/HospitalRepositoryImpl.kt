@@ -1,6 +1,6 @@
 package com.example.govix.hospital.data.repository
 
-import com.example.govix.data.remote.GovixHospitalApi
+import com.example.govix.core.data.remote.GovixHospitalApi
 import com.example.govix.hospital.data.mapper.toDomain
 import com.example.govix.hospital.domain.model.Doctor
 import com.example.govix.hospital.domain.model.DoctorSchedule

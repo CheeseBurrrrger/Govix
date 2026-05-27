@@ -24,8 +24,6 @@ private val AccentYellow = Color(0xFFFCB216)
 fun SavedQueuesScreen(viewModel: HospitalViewModel) {
     val state by viewModel.myQueuesState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { viewModel.loadMyQueues() }
-
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF7F7F7))) {
         Box(
             modifier = Modifier.fillMaxWidth().background(AccentYellow).padding(horizontal = 20.dp, vertical = 20.dp),
@@ -111,7 +109,7 @@ private fun QueueCard(queue: BookedQueue) {
         }
         Text(queue.patientName, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF1A1A1A))
         Text("NIK: ${queue.patientNik}", fontSize = 12.sp, color = Color(0xFF9E9E9E))
-        Text("Tanggal: ${queue.scheduleDate}", fontSize = 12.sp, color = Color(0xFF9E9E9E))
+        Text("Tanggal: ${queue.scheduleDate.take(10)}", fontSize = 12.sp, color = Color(0xFF9E9E9E))
     }
 }
 

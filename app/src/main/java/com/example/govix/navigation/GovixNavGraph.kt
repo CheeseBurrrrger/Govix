@@ -28,6 +28,8 @@ import com.example.govix.auth.AuthViewModel
 import com.example.govix.auth.ui.LoginScreen
 import com.example.govix.auth.ui.SignInScreen
 import com.example.govix.dashboard.ui.DashboardHomeScreen
+import com.example.govix.features.dashboard.presentation.DashboardState
+import com.example.govix.features.dashboard.presentation.DashboardViewModel
 import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.ui.EmergencyScreen
 import com.example.govix.hospital.ui.HospitalDetailScreen
@@ -45,6 +47,7 @@ fun GovixRoot(
     val navController = rememberNavController()
     val hydrated by authViewModel.hydrated.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
 
     LaunchedEffect(Unit) {
         authViewModel.events.collect { event ->
@@ -95,6 +98,8 @@ fun GovixNavGraph(
     val isLoading by authViewModel.isLoading.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val hospitalViewModel: HospitalViewModel = hiltViewModel()
+    val dashboardViewModel: DashboardViewModel = hiltViewModel()
+
 
     val bottomNavRoutes = setOf(
         Screen.Home,
@@ -167,19 +172,29 @@ fun GovixNavGraph(
                 },
             )
         }
-        composable(Screen.Home) {
-            LaunchedEffect(Unit) {
-                hospitalViewModel.loadHospitals()
+            composable(Screen.Home) {
+                LaunchedEffect(Unit) {
+                    dashboardViewModel.loadDashboard()
+                    hospitalViewModel.loadHospitals()
+                }
+                val dashboardState by dashboardViewModel.state.collectAsStateWithLifecycle()
+                val userName = when (val s = dashboardState) {
+                    is DashboardState.Success -> s.profile.firstName.ifBlank { s.profile.username }
+                    else -> "Pengunjung"
+                }
+                DashboardHomeScreen(
+                    navController = navController,
+                    hospitalViewModel = hospitalViewModel,
+                    userName = userName,
+                    onLogoutClick = { authViewModel.logout() },
+                )
             }
-            DashboardHomeScreen(
-                navController = navController,
-                hospitalViewModel = hospitalViewModel,
-                onLogoutClick = { authViewModel.logout() },
-            )
-        }
-        composable(Screen.Saved) {
-            SavedQueuesScreen(viewModel = hospitalViewModel)
-        }
+            composable(Screen.Saved) {
+                LaunchedEffect(Unit) {
+                    hospitalViewModel.loadMyQueues()
+                }
+                SavedQueuesScreen(viewModel = hospitalViewModel)
+            }
         composable(Screen.HospitalList) {
             HospitalListScreen(
                 viewModel = hospitalViewModel,

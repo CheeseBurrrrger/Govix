@@ -62,7 +62,6 @@ private val quickServices = listOf(
     ServiceItem("RSUD Haji", R.drawable.rsud_haji,     Color(0xFFE8F4FF), isHospital  = true),
 )
 
-// ── Root screen ───────────────────────────────────────────────────────────────
 @Composable
 fun DashboardHomeScreen(
     navController: NavController,

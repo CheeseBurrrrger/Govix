@@ -13,6 +13,7 @@ import com.example.govix.hospital.domain.usecase.GetDoctorsUseCase
 import com.example.govix.hospital.domain.usecase.GetHospitalDetailUseCase
 import com.example.govix.hospital.domain.usecase.GetHospitalsUseCase
 import com.example.govix.hospital.domain.usecase.GetPolyclinicsUseCase
+import com.example.govix.hospital.domain.usecase.GetRoomsUseCase
 import com.example.govix.hospital.domain.usecase.GetSchedulesUseCase
 import com.example.govix.queue.domain.model.BookQueueRequest
 import com.example.govix.queue.domain.usecase.BookQueueUseCase
@@ -63,7 +64,7 @@ data class MyQueuesUiState(
 
 data class BookedQueue(
     val id: Int,
-    val queueNumber: Int,
+    val queueNumber: String,
     val scheduleDate: String,
     val patientName: String,
     val patientNik: String,
@@ -73,7 +74,7 @@ data class BookedQueue(
 sealed class QueueBookingState {
     object Idle : QueueBookingState()
     object Loading : QueueBookingState()
-    data class Success(val queueNumber: Int) : QueueBookingState()
+    data class Success(val queueNumber: String) : QueueBookingState()
     data class Error(val message: String?) : QueueBookingState()
 }
 
@@ -87,7 +88,8 @@ class HospitalViewModel @Inject constructor(
     private val getSchedulesUseCase: GetSchedulesUseCase,
     private val bookQueueUseCase: BookQueueUseCase,
     private val getMyQueuesUseCase: GetMyQueuesUseCase,
-) : ViewModel() {
+    private val getRoomsUseCase: GetRoomsUseCase,
+    ) : ViewModel() {
 
     private val _listState = MutableStateFlow(HospitalListUiState())
     val listState: StateFlow<HospitalListUiState> = _listState.asStateFlow()
@@ -199,13 +201,25 @@ class HospitalViewModel @Inject constructor(
     }
 
     fun loadRooms(hospitalId: Int) {
-        // TODO: inject GetRoomsUseCase when HospitalModule provides it
-        _roomsState.value = HospitalRoomsUiState(error = "Fitur kamar belum tersedia.")
+        viewModelScope.launch {
+            _roomsState.value = HospitalRoomsUiState(isLoading = true)
+            getRoomsUseCase(hospitalId)
+                .onSuccess { rooms ->
+                    _roomsState.value = HospitalRoomsUiState(
+                        summary = rooms.summary,
+                        rooms = rooms.rooms,
+                        updatedAt = rooms.rooms.firstOrNull()?.updatedAt,
+                    )
+                }
+                .onFailure {
+                    _roomsState.value = HospitalRoomsUiState(error = it.message)
+                }
+        }
     }
 
     fun bookQueue(
         scheduleId: Int,
-        queueNumber: Int,
+        queueNumber: String,
         scheduleDate: String,
         patientName: String,
         patientNik: String,
@@ -240,6 +254,7 @@ class HospitalViewModel @Inject constructor(
             _myQueuesState.value = _myQueuesState.value.copy(isLoading = true, error = null)
             getMyQueuesUseCase()
                 .onSuccess { list ->
+                    android.util.Log.d("HospitalVM", "loadMyQueues success: ${list.size} items")
                     _myQueuesState.value = MyQueuesUiState(
                         queues = list.map { q ->
                             BookedQueue(
@@ -254,6 +269,7 @@ class HospitalViewModel @Inject constructor(
                     )
                 }
                 .onFailure {
+                    android.util.Log.e("HospitalVM", "loadMyQueues failed: ${it.message}")
                     _myQueuesState.value = MyQueuesUiState(isLoading = false, error = it.message)
                 }
         }

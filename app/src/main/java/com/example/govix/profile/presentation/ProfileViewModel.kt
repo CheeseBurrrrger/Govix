@@ -51,7 +51,6 @@ class ProfileViewModel @Inject constructor(
     }
 }
 
-// States
 sealed class ProfileState {
     object Idle    : ProfileState()
     object Loading : ProfileState()

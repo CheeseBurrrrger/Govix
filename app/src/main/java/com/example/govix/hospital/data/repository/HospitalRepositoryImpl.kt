@@ -40,7 +40,7 @@ class HospitalRepositoryImpl @Inject constructor(
                 }
                 val infoDeferred = async{
                     val r = api.getOperationalInfo(id)
-                    if(!r.isSuccessful)r.body()?.data.orEmpty().map { it.toDomain() }
+                    if(r.isSuccessful)r.body()?.data.orEmpty().map { it.toDomain() }
                     else emptyList()
                 }
                 HospitalDetail(

@@ -27,10 +27,15 @@ import com.example.govix.hospital.domain.model.DoctorSchedule
 import com.example.govix.hospital.domain.model.Polyclinic
 import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.presentation.QueueBookingState
-import com.example.govix.hospital.ui.components.HospitalPrimary
-
+import com.example.govix.hospital.ui.components.DatePickerField
 private val AccentYellow = Color(0xFFFCB216)
 
+private fun isoToDdMmYyyy(iso: String): String {
+    if (iso.length < 10) return iso
+    val parts = iso.take(10).split("-")
+    if (parts.size != 3) return iso
+    return "${parts[2]}-${parts[1]}-${parts[0]}"
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HospitalQueueScreen(
@@ -209,7 +214,6 @@ fun HospitalQueueScreen(
                 }
             }
 
-            // Patient data
             SectionCard {
                 FieldLabel("Data Pasien")
                 OutlinedTextField(
@@ -226,26 +230,33 @@ fun HospitalQueueScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = patientBirthDate, onValueChange = { patientBirthDate = it },
-                    label = { Text("Tanggal Lahir (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                    value = isoToDdMmYyyy(patientBirthDate),
+                    onValueChange = {},
+                    label = { Text("Tanggal Lahir Pasien") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    enabled = false,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledBorderColor = Color(0xFFCCCCCC),
+                        disabledTextColor = Color(0xFF1A1A1A),
+                        disabledLabelColor = Color(0xFF9E9E9E),
+                    ),
                 )
             }
 
-            // Booking data
             SectionCard {
                 FieldLabel("Data Booking")
-                OutlinedTextField(
-                    value = scheduleDate, onValueChange = { scheduleDate = it },
-                    label = { Text("Tanggal Berobat (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
+                DatePickerField(
+                    label = "Tanggal Berobat",
+                    value = scheduleDate,
+                    onDateSelected = { scheduleDate = it },
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = queueNumber, onValueChange = { queueNumber = it },
-                    label = { Text("Nomor Antrean") }, modifier = Modifier.fillMaxWidth(),
+                    value = queueNumber,
+                    onValueChange = { queueNumber = it },
+                    label = { Text("Nomor Antrean") },
+                    modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentYellow),
                 )
@@ -254,17 +265,15 @@ fun HospitalQueueScreen(
             Button(
                 onClick = {
                     val sid = selectedSchedule?.id ?: return@Button
-                    val qn = queueNumber.trim().toIntOrNull()
-                    val sdIso = parseDdMmYyyyToIsoOrNull(scheduleDate) ?: scheduleDate.trim()
-                    val bdRaw = patientBirthDate.trim()
-                    val bdIso = if (Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(bdRaw)) bdRaw
-                    else parseDdMmYyyyToIsoOrNull(bdRaw) ?: bdRaw
+                    val qn = queueNumber
+                    val sdIso = scheduleDate.trim()
+                    val bdIso = patientBirthDate.trim().take(10)
                     when {
                         patientName.isBlank() -> Toast.makeText(context, "Nama pasien wajib diisi.", Toast.LENGTH_LONG).show()
                         patientNik.length != 16 || !patientNik.all { it.isDigit() } -> Toast.makeText(context, "NIK harus 16 digit.", Toast.LENGTH_LONG).show()
                         !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(bdIso) -> Toast.makeText(context, "Format tanggal lahir salah.", Toast.LENGTH_LONG).show()
                         !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(sdIso) -> Toast.makeText(context, "Format tanggal berobat salah.", Toast.LENGTH_LONG).show()
-                        qn == null || qn <= 0 -> Toast.makeText(context, "Nomor antrean tidak valid.", Toast.LENGTH_LONG).show()
+                        qn == null || qn.length <= 0 -> Toast.makeText(context, "Nomor antrean tidak valid.", Toast.LENGTH_LONG).show()
                         else -> viewModel.bookQueue(sid, qn, sdIso, patientName, patientNik, bdIso)
                     }
                 },
@@ -283,6 +292,7 @@ fun HospitalQueueScreen(
         }
     }
 }
+
 
 @Composable
 private fun SectionCard(content: @Composable ColumnScope.() -> Unit) {

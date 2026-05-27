@@ -8,7 +8,7 @@ import com.example.govix.queue.domain.model.Queue
 fun QueueDto.toDomain() = Queue(
     id = id?:0,
     scheduleId = scheduleId?:0,
-    queueNumber = queueNumber?:0,
+    queueNumber = queueNumber.orEmpty(),
     scheduleDate = scheduleDate.orEmpty(),
     patientName = patientName.orEmpty(),
     patientNik = patientNik.orEmpty(),

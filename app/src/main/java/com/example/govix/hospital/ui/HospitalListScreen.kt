@@ -1,5 +1,6 @@
 package com.example.govix.hospital.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.govix.hospital.domain.model.Hospital
 import com.example.govix.hospital.presentation.HospitalViewModel
 import com.example.govix.hospital.ui.components.HospitalPrimary
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.govix.hospital.util.HospitalAssets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,11 +133,13 @@ private fun HospitalCard(hospital: Hospital, onClick: () -> Unit) {
                 .background(Color(0xFFFFF3D6)),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = hospital.shortName.take(2).ifBlank { hospital.name.take(2) }.uppercase(),
-                fontWeight = FontWeight.ExtraBold,
-                color = HospitalPrimary,
-                fontSize = 16.sp,
+            Image(
+                painter = painterResource(HospitalAssets.logoDrawableRes(hospital.name)),
+                contentDescription = hospital.name,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Fit,
             )
         }
         Spacer(Modifier.width(14.dp))

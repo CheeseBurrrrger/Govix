@@ -164,7 +164,7 @@ private fun ProfileContent(
                         else                        -> profile.gender.orDash()
                     }
                 )
-                ProfileRow(Icons.Outlined.Cake,         "Tanggal Lahir", profile.birthDate.orDash(), isLast = true)
+                ProfileRow(Icons.Outlined.Cake,         "Tanggal Lahir", profile.birthDate.orDash().take(10), isLast = true)
             }
             ProfileCard(title = "Kontak & Lokasi") {
                 ProfileRow(Icons.Outlined.Email,        "Email",    profile.email)

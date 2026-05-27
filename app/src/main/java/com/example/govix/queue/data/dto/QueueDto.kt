@@ -4,19 +4,17 @@ import com.google.gson.annotations.SerializedName
 
 data class QueueRequestDto(
     val scheduleId: Int,
-    val queueNumber: Int,
-    /** ISO `yyyy-MM-dd` */
+    val queueNumber: String,
     val scheduleDate: String,
     val patientName: String,
     val patientNik: String,
-    /** ISO `yyyy-MM-dd` */
     val patientBirthDate: String,
 )
 
 data class QueueDto(
     val id: Int? = null,
     @SerializedName("schedule_id") val scheduleId: Int? = null,
-    @SerializedName("queue_number") val queueNumber: Int? = null,
+    @SerializedName("queue_number") val queueNumber: String? = null,
     @SerializedName("schedule_date") val scheduleDate: String? = null,
     @SerializedName("patient_name") val patientName: String? = null,
     @SerializedName("patient_nik") val patientNik: String? = null,
